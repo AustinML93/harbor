@@ -30,7 +30,8 @@ export default function Dashboard() {
           label="CPU"
           value={formatted?.cpu ?? "—"}
           detail={stats ? `${stats.cpu_percent.toFixed(1)}% utilization` : undefined}
-          icon={<Cpu size={18} />}
+          icon={<Cpu size={16} />}
+          accent={{ bg: "var(--color-accent-dim)", fg: "var(--color-accent)" }}
           percent={stats?.cpu_percent}
           loading={!stats}
         />
@@ -38,7 +39,8 @@ export default function Dashboard() {
           label="Memory"
           value={formatted?.ram ?? "—"}
           detail={formatted?.ramDetail}
-          icon={<MemoryStick size={18} />}
+          icon={<MemoryStick size={16} />}
+          accent={{ bg: "var(--color-warning-dim)", fg: "var(--color-warning)" }}
           percent={stats?.ram_percent}
           loading={!stats}
         />
@@ -46,7 +48,8 @@ export default function Dashboard() {
           label="Disk"
           value={formatted?.disk ?? "—"}
           detail={formatted?.diskDetail}
-          icon={<HardDrive size={18} />}
+          icon={<HardDrive size={16} />}
+          accent={{ bg: "var(--color-success-dim)", fg: "var(--color-success)" }}
           percent={stats?.disk_percent}
           loading={!stats}
         />
@@ -54,7 +57,8 @@ export default function Dashboard() {
           label="Network ↓"
           value={formatted?.netRx ?? "—"}
           detail={`↑ ${formatted?.netTx ?? "—"} total sent`}
-          icon={<Network size={18} />}
+          icon={<Network size={16} />}
+          accent={{ bg: "var(--color-border)", fg: "var(--color-muted)" }}
           loading={!stats}
         />
       </div>
