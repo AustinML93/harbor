@@ -32,9 +32,15 @@ const config: Config = {
         ],
         mono: ["JetBrains Mono", "ui-monospace", "monospace"],
       },
+      boxShadow: {
+        card: "var(--shadow-card)",
+        "card-hover": "var(--shadow-card-hover)",
+        xs: "var(--shadow-xs)",
+      },
       animation: {
         "fade-in": "fadeIn 0.2s ease-in-out",
         "slide-up": "slideUp 0.2s ease-out",
+        "scale-in": "scaleIn 0.15s ease-out",
         pulse: "pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite",
       },
       keyframes: {
@@ -45,6 +51,10 @@ const config: Config = {
         slideUp: {
           "0%": { transform: "translateY(8px)", opacity: "0" },
           "100%": { transform: "translateY(0)", opacity: "1" },
+        },
+        scaleIn: {
+          "0%": { transform: "scale(0.96)", opacity: "0" },
+          "100%": { transform: "scale(1)", opacity: "1" },
         },
       },
     },
