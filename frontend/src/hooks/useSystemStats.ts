@@ -1,5 +1,4 @@
 import { useStore } from "../store";
-import type { SystemStats } from "../types";
 
 function formatUptime(seconds: number): string {
   const d = Math.floor(seconds / 86400);
