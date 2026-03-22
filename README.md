@@ -225,6 +225,31 @@ If you find a bug, please [open an issue](../../issues) with your Docker version
 
 ---
 
+## Known compatibility issues
+
+### Python 3.14 + SQLAlchemy — `X | None` union syntax
+
+If you're developing with Python 3.14, SQLAlchemy will raise a `TypeError` on startup when processing `Mapped[X | None]` annotations in model files:
+
+```
+TypeError: descriptor '__getitem__' requires a 'typing.Union' object but received a 'tuple'
+```
+
+Python 3.14 changed how PEP 604 unions (`str | None`) are represented internally — they become `types.UnionType` instead of `typing.Union`, which SQLAlchemy's type introspection rejects. All models in this project use `Optional[X]` from `typing` to avoid this. If you add new model columns, do the same:
+
+```python
+# Bad — breaks on Python 3.14
+webhook_url: Mapped[str | None] = mapped_column(String, nullable=True)
+
+# Good
+from typing import Optional
+webhook_url: Mapped[Optional[str]] = mapped_column(String, nullable=True)
+```
+
+The Docker image uses Python 3.11 and is unaffected.
+
+---
+
 ## Tech stack
 
 | Layer | Technology |
