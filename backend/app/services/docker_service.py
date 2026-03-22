@@ -15,7 +15,7 @@ logger = logging.getLogger(__name__)
 
 # Cached singleton Docker client — reset on connection failure so the next
 # call creates a fresh one rather than retrying a broken connection.
-_docker_client: docker.DockerClient | None = None
+_docker_client: Optional[docker.DockerClient] = None
 
 # Previous container states — used to detect transitions for uptime recording.
 # Persists for the lifetime of the process; resets to {} on restart.
