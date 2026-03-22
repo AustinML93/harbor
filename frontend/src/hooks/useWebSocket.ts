@@ -10,6 +10,7 @@ export function useWebSocket() {
   const wsRef = useRef<WebSocket | null>(null);
   const reconnectAttempt = useRef(0);
   const pingInterval = useRef<ReturnType<typeof setInterval> | null>(null);
+  const destroyed = useRef(false);
 
   const { setStats, setContainers, setWsConnected } = useStore();
 
@@ -56,9 +57,14 @@ export function useWebSocket() {
       }
     };
 
-    ws.onclose = () => {
+    ws.onclose = (event) => {
       setWsConnected(false);
       if (pingInterval.current) clearInterval(pingInterval.current);
+
+      // 4xxx = auth failure — reconnecting won't help until the token changes
+      if (event.code >= 4000) return;
+      // Component unmounted — don't create a socket that can never be cleaned up
+      if (destroyed.current) return;
 
       // Exponential backoff reconnect
       const delay =
@@ -77,6 +83,7 @@ export function useWebSocket() {
   useEffect(() => {
     connect();
     return () => {
+      destroyed.current = true;
       if (pingInterval.current) clearInterval(pingInterval.current);
       wsRef.current?.close();
     };

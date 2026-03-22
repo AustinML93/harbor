@@ -1,4 +1,4 @@
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation } from "@tanstack/react-query";
 import { useStore } from "../store";
 import api from "../lib/api";
 import type { ContainerAction, ContainerSummary } from "../types";
@@ -9,7 +9,6 @@ export function useContainers() {
 }
 
 export function useContainerAction() {
-  const queryClient = useQueryClient();
   const { addToast, setContainers, containers } = useStore();
 
   return useMutation({
@@ -17,7 +16,7 @@ export function useContainerAction() {
       api.post(`/containers/${id}/${action}`),
 
     onMutate: ({ id, action }) => {
-      // Optimistic update
+      const previousContainers = containers;
       const optimisticState =
         action === "start" ? "running" : action === "stop" ? "exited" : "restarting";
       setContainers(
@@ -25,6 +24,7 @@ export function useContainerAction() {
           c.id === id ? { ...c, state: optimisticState as ContainerSummary["state"] } : c
         )
       );
+      return { previousContainers };
     },
 
     onSuccess: (_data, { action }) => {
@@ -34,7 +34,10 @@ export function useContainerAction() {
       });
     },
 
-    onError: (_err, _vars, _ctx) => {
+    onError: (_err, _vars, ctx) => {
+      if (ctx?.previousContainers) {
+        setContainers(ctx.previousContainers);
+      }
       addToast({ type: "error", message: "Action failed. Check Docker connectivity." });
     },
   });
