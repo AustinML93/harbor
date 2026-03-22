@@ -2,6 +2,10 @@ fastapi==0.115.5
 uvicorn[standard]==0.32.1
 python-jose[cryptography]==3.3.0
 passlib[bcrypt]==1.7.4
+# bcrypt is pinned to 4.0.1 because passlib 1.7.4 uses the legacy bcrypt.__about__
+# attribute to detect the version, which was removed in bcrypt 4.1+. Without this
+# pin, passlib raises AttributeError on import on fresh installs.
+bcrypt==4.0.1
 pydantic-settings==2.6.1
 sqlalchemy==2.0.36
 docker==7.1.0
