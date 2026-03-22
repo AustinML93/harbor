@@ -21,12 +21,11 @@ class ConnectionManager:
         self.router.add_api_websocket_route("/ws", self.websocket_endpoint)
 
     async def connect(self, websocket: WebSocket) -> None:
-        await websocket.accept()
+        """Register an already-accepted WebSocket. Caller owns the accept() call."""
         self._connections.append(websocket)
         logger.info("WS client connected. Total: %d", len(self._connections))
 
     def disconnect(self, websocket: WebSocket) -> None:
-        self._connections.discard if hasattr(self._connections, "discard") else None
         if websocket in self._connections:
             self._connections.remove(websocket)
         logger.info("WS client disconnected. Total: %d", len(self._connections))
@@ -45,7 +44,9 @@ class ConnectionManager:
             self.disconnect(ws)
 
     async def websocket_endpoint(self, websocket: WebSocket) -> None:
-        # Auth: validate JWT from query param
+        # Accept the upgrade first — close frames can only be sent after accept().
+        await websocket.accept()
+
         token = websocket.query_params.get("token")
         if not token:
             await websocket.close(code=4001, reason="Missing token")
@@ -61,7 +62,7 @@ class ConnectionManager:
         await self.connect(websocket)
         try:
             while True:
-                # Listen for client messages (ping/pong or future client commands)
+                # Listen for client messages (ping or future commands)
                 data = await websocket.receive_text()
                 try:
                     msg = json.loads(data)
@@ -75,29 +76,39 @@ class ConnectionManager:
     async def broadcast_loop(self) -> None:
         """
         Background task running for the lifetime of the application.
-        - Every 1s: broadcast system stats
-        - Every 5s: broadcast container list
-        - Every 30s: run notification rule engine
+
+        Intervals:
+          - Every 1s:  system stats broadcast
+          - Every 5s:  container list broadcast + uptime event recording
+          - Every 30s: notification rule engine
+
+        Blocking sync calls (psutil, Docker SDK) are offloaded to the thread
+        pool via run_in_executor so they never stall the event loop.
         """
         from app.services.docker_service import docker_service
         from app.services.notifier import notifier
 
-        tick = 0
+        loop = asyncio.get_event_loop()
+        container_tick = 0
+        alert_tick = 0
+
         while True:
             await asyncio.sleep(1)
-            tick += 1
+            container_tick += 1
+            alert_tick += 1
 
-            # System stats every second
+            # System stats — every second
             try:
-                stats = system_service.get_stats()
+                stats = await loop.run_in_executor(None, system_service.get_stats)
                 await self.broadcast({"type": "stats", "data": stats.model_dump()})
             except Exception as e:
                 logger.debug("Stats broadcast error: %s", e)
 
-            # Container list every 5 seconds
-            if tick % 5 == 0:
+            # Container list — every 5 seconds
+            if container_tick >= 5:
+                container_tick = 0
                 try:
-                    containers = docker_service.list_containers()
+                    containers = await loop.run_in_executor(None, docker_service.list_containers)
                     await self.broadcast({
                         "type": "containers",
                         "data": [c.model_dump() for c in containers],
@@ -105,10 +116,11 @@ class ConnectionManager:
                 except Exception as e:
                     logger.debug("Container broadcast error: %s", e)
 
-            # Notification check every 30 seconds
-            if tick % 30 == 0:
+            # Notification rule engine — every 30 seconds
+            if alert_tick >= 30:
+                alert_tick = 0
                 try:
-                    notifier.check_and_fire()
+                    await loop.run_in_executor(None, notifier.check_and_fire)
                 except Exception as e:
                     logger.debug("Notifier error: %s", e)
 
