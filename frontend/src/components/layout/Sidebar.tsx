@@ -1,10 +1,7 @@
-import { NavLink } from "react-router-dom";
-import { Anchor, LayoutDashboard, Container, Grid3X3 } from "lucide-react";
+import { NavLink, useNavigate } from "react-router-dom";
+import { Anchor, Container, Grid3X3, LayoutDashboard, LogOut, Moon, Sun } from "lucide-react";
 import { useStore } from "../../store";
-import { ThemeToggle } from "./ThemeToggle";
 import { clearToken } from "../../lib/auth";
-import { LogOut } from "lucide-react";
-import { useNavigate } from "react-router-dom";
 
 const NAV_ITEMS = [
   { to: "/", label: "Dashboard", icon: LayoutDashboard },
@@ -14,6 +11,7 @@ const NAV_ITEMS = [
 
 export function Sidebar() {
   const wsConnected = useStore((s) => s.wsConnected);
+  const { theme, toggleTheme } = useStore();
   const navigate = useNavigate();
 
   function handleLogout() {
@@ -23,21 +21,24 @@ export function Sidebar() {
 
   return (
     <aside
-      className="flex w-56 flex-shrink-0 flex-col border-r"
-      style={{ backgroundColor: "var(--color-surface)", borderColor: "var(--color-border)" }}
+      className="flex w-56 flex-shrink-0 flex-col"
+      style={{
+        backgroundColor: "var(--color-surface)",
+        boxShadow: "inset -1px 0 0 var(--color-border)",
+      }}
     >
       {/* Logo */}
       <div
-        className="flex items-center gap-2.5 border-b px-4 py-4"
-        style={{ borderColor: "var(--color-border)" }}
+        className="flex items-center gap-2.5 px-4 py-4"
+        style={{ boxShadow: "inset 0 -1px 0 var(--color-border)" }}
       >
         <div
           className="flex h-8 w-8 items-center justify-center rounded-lg"
           style={{ backgroundColor: "var(--color-accent-dim)", color: "var(--color-accent)" }}
         >
-          <Anchor size={16} strokeWidth={1.75} />
+          <Anchor size={20} strokeWidth={1.75} />
         </div>
-        <span className="font-semibold tracking-tight" style={{ color: "var(--color-text)" }}>
+        <span className="text-[15px] font-semibold tracking-tight" style={{ color: "var(--color-text)" }}>
           Harbor
         </span>
         {/* WS connection dot */}
@@ -63,6 +64,7 @@ export function Sidebar() {
             style={({ isActive }) => ({
               backgroundColor: isActive ? "var(--color-accent-dim)" : "transparent",
               color: isActive ? "var(--color-accent)" : "var(--color-muted)",
+              borderLeft: isActive ? "3px solid var(--color-accent)" : "3px solid transparent",
             })}
             onMouseEnter={(e) => {
               if (!(e.currentTarget as HTMLElement).classList.contains("active-nav")) {
@@ -85,16 +87,40 @@ export function Sidebar() {
 
       {/* Footer */}
       <div
-        className="flex items-center justify-between border-t px-3 py-3"
-        style={{ borderColor: "var(--color-border)" }}
+        className="space-y-1 px-2 py-3"
+        style={{ boxShadow: "inset 0 1px 0 var(--color-border)" }}
       >
-        <ThemeToggle />
+        <button
+          onClick={toggleTheme}
+          className="flex w-full items-center gap-2.5 rounded-md px-3 py-2 text-sm font-medium transition-colors"
+          style={{ color: "var(--color-muted)" }}
+          onMouseEnter={(e) => {
+            (e.currentTarget as HTMLElement).style.backgroundColor = "var(--color-border)";
+            (e.currentTarget as HTMLElement).style.color = "var(--color-text)";
+          }}
+          onMouseLeave={(e) => {
+            (e.currentTarget as HTMLElement).style.backgroundColor = "transparent";
+            (e.currentTarget as HTMLElement).style.color = "var(--color-muted)";
+          }}
+        >
+          {theme === "dark" ? <Sun size={16} strokeWidth={1.75} /> : <Moon size={16} strokeWidth={1.75} />}
+          {theme === "dark" ? "Light mode" : "Dark mode"}
+        </button>
         <button
           onClick={handleLogout}
-          className="harbor-btn-ghost rounded-md p-1.5"
-          title="Sign out"
+          className="flex w-full items-center gap-2.5 rounded-md px-3 py-2 text-sm font-medium transition-colors"
+          style={{ color: "var(--color-muted)" }}
+          onMouseEnter={(e) => {
+            (e.currentTarget as HTMLElement).style.backgroundColor = "var(--color-border)";
+            (e.currentTarget as HTMLElement).style.color = "var(--color-text)";
+          }}
+          onMouseLeave={(e) => {
+            (e.currentTarget as HTMLElement).style.backgroundColor = "transparent";
+            (e.currentTarget as HTMLElement).style.color = "var(--color-muted)";
+          }}
         >
-          <LogOut size={15} />
+          <LogOut size={16} strokeWidth={1.75} />
+          Sign out
         </button>
       </div>
     </aside>
