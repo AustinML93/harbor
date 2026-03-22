@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { Plus } from "lucide-react";
+import { Globe, Plus } from "lucide-react";
 import api from "../lib/api";
 import { ServiceGrid } from "../components/services/ServiceGrid";
 import { Modal } from "../components/ui/Modal";
@@ -93,6 +93,11 @@ export default function Services() {
     saveMutation.mutate(services.filter((s) => s.name !== item.name));
   }
 
+  function handleImport() {
+    queryClient.invalidateQueries({ queryKey: ["services"] });
+    addToast({ type: "info", message: "Reloading services from services.yml…" });
+  }
+
   return (
     <div className="space-y-4 animate-fade-in">
       <div className="flex items-center justify-between">
@@ -110,12 +115,42 @@ export default function Services() {
         </button>
       </div>
 
-      <ServiceGrid
-        services={services}
-        loading={isLoading}
-        onEdit={setEditItem}
-        onDelete={handleDelete}
-      />
+      {services.length === 0 && !isLoading ? (
+        <div
+          className="flex flex-col items-center justify-center rounded-lg border py-16 text-center"
+          style={{ borderColor: "var(--color-border)" }}
+        >
+          <div
+            className="mb-4 flex h-14 w-14 items-center justify-center rounded-full"
+            style={{ backgroundColor: "var(--color-border)" }}
+          >
+            <Globe size={24} style={{ color: "var(--color-muted)" }} />
+          </div>
+          <h3 className="mb-1 text-base font-semibold" style={{ color: "var(--color-text)" }}>
+            No services yet
+          </h3>
+          <p className="mb-6 max-w-sm text-sm" style={{ color: "var(--color-muted)" }}>
+            Services are quick-launch links to your self-hosted apps. Add them manually or import
+            from services.yml.
+          </p>
+          <div className="flex items-center gap-3">
+            <button onClick={() => setShowAdd(true)} className="harbor-btn-primary">
+              <Plus size={15} />
+              Add your first service
+            </button>
+            <button onClick={handleImport} className="harbor-btn-ghost">
+              Import from services.yml
+            </button>
+          </div>
+        </div>
+      ) : (
+        <ServiceGrid
+          services={services}
+          loading={isLoading}
+          onEdit={setEditItem}
+          onDelete={handleDelete}
+        />
+      )}
 
       <Modal isOpen={showAdd} onClose={() => setShowAdd(false)} title="Add service">
         <ServiceForm onSave={handleAdd} onCancel={() => setShowAdd(false)} />

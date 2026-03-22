@@ -120,6 +120,7 @@ Configurable tiles for navigating to homelab services.
 - `[ ]` Frontend: Add/edit service modal
 - `[ ]` Frontend: Drag-to-reorder (nice-to-have, defer if complex)
 - `[ ]` Frontend: Category grouping / filter tabs
+- `[ ]` **Backlog:** Auto-discovery — scan running containers for known service images (Grafana, Portainer, etc.) and offer to add them as tiles
 
 ### Acceptance Criteria
 - `services.yml` additions appear in UI on next page load
@@ -197,3 +198,4 @@ These are intentionally out of scope for Phase 1 but worth noting:
 - **Port mapping view** — visual map of which ports are exposed
 - **Image management** — pull, prune, list images
 - **Volume browser** — inspect named volumes
+- **Service auto-discovery** — detect known homelab images from running containers and suggest adding them as service tiles
