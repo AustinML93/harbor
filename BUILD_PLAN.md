@@ -44,6 +44,7 @@ Real system data flowing to the frontend.
 - `[ ]` Frontend: `StatCard` component — icon, label, value, sparkline placeholder
 - `[ ]` Frontend: Four stat cards wired to `GET /api/system/stats`
 - `[ ]` Frontend: Auto-refresh every 5s via TanStack Query `refetchInterval`
+- `[ ]` **Dashboard Icons integration** — use walkxcode/dashboard-icons SVGs for service tiles. Auto-match icon by service name (case-insensitive), fall back to letter avatar if no match found.
 
 ### Acceptance Criteria
 - Stats endpoint returns valid CPU/RAM/disk/network data

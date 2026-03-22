@@ -1,3 +1,7 @@
+# Harbor — Self-hosted homelab dashboard
+# Requires Python 3.11+ (backend image). Exposed on port 3113.
+# Usage: cp .env.example .env && docker compose up -d
+
 services:
   backend:
     build:
@@ -32,7 +36,7 @@ services:
     container_name: harbor-frontend
     restart: unless-stopped
     ports:
-      - "3000:80"
+      - "3113:80"
     networks:
       - harbor-internal
     depends_on:
