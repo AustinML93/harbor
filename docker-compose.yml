@@ -1,0 +1,53 @@
+services:
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: harbor-backend
+    restart: unless-stopped
+    env_file: .env
+    volumes:
+      # Docker socket — required for container management
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      # SQLite database persistence
+      - ./backend/data:/app/data
+      # Services config — edit this file to add quick-launch tiles
+      - ./services.yml:/app/services.yml
+    networks:
+      - harbor-internal
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+    # Don't expose backend port directly — nginx proxies to it
+    expose:
+      - "8000"
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: harbor-frontend
+    restart: unless-stopped
+    ports:
+      - "3000:80"
+    networks:
+      - harbor-internal
+    depends_on:
+      backend:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:80"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 5s
+
+networks:
+  harbor-internal:
+    driver: bridge
+
+# Named volumes are not used — we prefer bind mounts so data location is explicit
+# and easy to backup. The backend/data directory is bind-mounted above.

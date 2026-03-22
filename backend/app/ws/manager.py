@@ -1,0 +1,116 @@
+from __future__ import annotations
+
+import asyncio
+import json
+import logging
+from typing import Any
+
+from fastapi import APIRouter, WebSocket, WebSocketDisconnect
+from jose import JWTError
+
+from app.core.security import decode_token
+from app.services.system_service import system_service
+
+logger = logging.getLogger(__name__)
+
+
+class ConnectionManager:
+    def __init__(self):
+        self._connections: list[WebSocket] = []
+        self.router = APIRouter()
+        self.router.add_api_websocket_route("/ws", self.websocket_endpoint)
+
+    async def connect(self, websocket: WebSocket) -> None:
+        await websocket.accept()
+        self._connections.append(websocket)
+        logger.info("WS client connected. Total: %d", len(self._connections))
+
+    def disconnect(self, websocket: WebSocket) -> None:
+        self._connections.discard if hasattr(self._connections, "discard") else None
+        if websocket in self._connections:
+            self._connections.remove(websocket)
+        logger.info("WS client disconnected. Total: %d", len(self._connections))
+
+    async def broadcast(self, message: dict[str, Any]) -> None:
+        if not self._connections:
+            return
+        payload = json.dumps(message)
+        dead: list[WebSocket] = []
+        for ws in list(self._connections):
+            try:
+                await ws.send_text(payload)
+            except Exception:
+                dead.append(ws)
+        for ws in dead:
+            self.disconnect(ws)
+
+    async def websocket_endpoint(self, websocket: WebSocket) -> None:
+        # Auth: validate JWT from query param
+        token = websocket.query_params.get("token")
+        if not token:
+            await websocket.close(code=4001, reason="Missing token")
+            return
+        try:
+            payload = decode_token(token)
+            if payload.get("sub") != "harbor-admin":
+                raise ValueError("Bad subject")
+        except (JWTError, ValueError):
+            await websocket.close(code=4001, reason="Invalid token")
+            return
+
+        await self.connect(websocket)
+        try:
+            while True:
+                # Listen for client messages (ping/pong or future client commands)
+                data = await websocket.receive_text()
+                try:
+                    msg = json.loads(data)
+                    if msg.get("type") == "ping":
+                        await websocket.send_text(json.dumps({"type": "pong"}))
+                except json.JSONDecodeError:
+                    pass
+        except WebSocketDisconnect:
+            self.disconnect(websocket)
+
+    async def broadcast_loop(self) -> None:
+        """
+        Background task running for the lifetime of the application.
+        - Every 1s: broadcast system stats
+        - Every 5s: broadcast container list
+        - Every 30s: run notification rule engine
+        """
+        from app.services.docker_service import docker_service
+        from app.services.notifier import notifier
+
+        tick = 0
+        while True:
+            await asyncio.sleep(1)
+            tick += 1
+
+            # System stats every second
+            try:
+                stats = system_service.get_stats()
+                await self.broadcast({"type": "stats", "data": stats.model_dump()})
+            except Exception as e:
+                logger.debug("Stats broadcast error: %s", e)
+
+            # Container list every 5 seconds
+            if tick % 5 == 0:
+                try:
+                    containers = docker_service.list_containers()
+                    await self.broadcast({
+                        "type": "containers",
+                        "data": [c.model_dump() for c in containers],
+                    })
+                except Exception as e:
+                    logger.debug("Container broadcast error: %s", e)
+
+            # Notification check every 30 seconds
+            if tick % 30 == 0:
+                try:
+                    notifier.check_and_fire()
+                except Exception as e:
+                    logger.debug("Notifier error: %s", e)
+
+
+ws_manager = ConnectionManager()
