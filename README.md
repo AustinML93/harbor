@@ -96,7 +96,10 @@ Replace `yourpassword` with your actual password. Paste the output as `PASSWORD_
 
 ```bash
 cp services.example.yml services.yml
+chmod 666 services.yml
 ```
+
+The `chmod` is required so the container user can write back to the file — without it, editing or deleting services from the UI will return 500 errors.
 
 Edit `services.yml` to add your homelab services — Grafana, Portainer, Nextcloud, whatever you're running. The example file has common ones to start from. You can also skip this and add services from the UI later.
 
