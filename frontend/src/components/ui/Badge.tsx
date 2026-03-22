@@ -8,7 +8,7 @@ const STATE_CONFIG: Record<ContainerState, { label: string; color: string; bg: s
   running: {
     label: "Running",
     color: "var(--color-success)",
-    bg: "rgba(63, 185, 80, 0.12)",
+    bg: "var(--color-success-dim)",
     dot: true,
   },
   exited: {
@@ -20,13 +20,13 @@ const STATE_CONFIG: Record<ContainerState, { label: string; color: string; bg: s
   paused: {
     label: "Paused",
     color: "var(--color-warning)",
-    bg: "rgba(210, 153, 34, 0.12)",
+    bg: "var(--color-warning-dim)",
     dot: false,
   },
   restarting: {
     label: "Restarting",
     color: "var(--color-warning)",
-    bg: "rgba(210, 153, 34, 0.12)",
+    bg: "var(--color-warning-dim)",
     dot: true,
   },
   dead: {

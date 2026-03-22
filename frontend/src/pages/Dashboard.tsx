@@ -1,12 +1,14 @@
 import { Cpu, HardDrive, MemoryStick, Network } from "lucide-react";
 import { useContainers } from "../hooks/useContainers";
 import { useSystemStats } from "../hooks/useSystemStats";
+import { useStore } from "../store";
 import { StatCard } from "../components/dashboard/StatCard";
 import { ContainerCard } from "../components/dashboard/ContainerCard";
 
 export default function Dashboard() {
   const { stats, formatted } = useSystemStats();
   const containers = useContainers();
+  const wsConnected = useStore((s) => s.wsConnected);
 
   const runningCount = containers.filter((c) => c.state === "running").length;
   const totalCount = containers.length;
@@ -62,12 +64,21 @@ export default function Dashboard() {
         <h2 className="mb-3 text-sm font-medium" style={{ color: "var(--color-muted)" }}>
           CONTAINERS
         </h2>
-        {containers.length === 0 ? (
+        {containers.length === 0 && !wsConnected ? (
+          <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
+            {Array.from({ length: 6 }).map((_, i) => (
+              <div
+                key={i}
+                className="harbor-card h-28 animate-pulse"
+                style={{ backgroundColor: "var(--color-card)" }}
+              />
+            ))}
+          </div>
+        ) : containers.length === 0 ? (
           <div
             className="rounded-lg border py-10 text-center text-sm"
             style={{ borderColor: "var(--color-border)", color: "var(--color-muted)" }}
           >
-            {/* Show skeleton or empty state depending on WS connection */}
             No containers found
           </div>
         ) : (

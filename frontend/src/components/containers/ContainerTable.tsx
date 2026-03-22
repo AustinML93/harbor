@@ -92,7 +92,7 @@ export function ContainerTable({ containers, onAction, onViewLogs, actionPending
                       color:
                         c.uptime_24h_pct >= 99
                           ? "var(--color-success)"
-                          : c.uptime_24h_pct >= 90
+                          : c.uptime_24h_pct >= 95
                           ? "var(--color-warning)"
                           : "var(--color-danger)",
                     }}
