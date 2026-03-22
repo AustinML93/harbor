@@ -72,6 +72,7 @@ List, inspect, and control Docker containers.
 - `[ ]` Frontend: `ActionMenu` with start/stop/restart buttons + confirmation for stop
 - `[ ]` Frontend: Log drawer — slide-out panel with scrollable container logs
 - `[ ]` Frontend: Optimistic UI for actions (state updates immediately, rolls back on error)
+- `[ ]` **Backlog:** Container remove/delete action — `DELETE /api/containers/{id}` endpoint + confirmation modal in UI. Currently only start/stop/restart are exposed; delete is a destructive action requiring explicit user confirmation before proceeding.
 
 ### Acceptance Criteria
 - Container list shows all running and stopped containers
