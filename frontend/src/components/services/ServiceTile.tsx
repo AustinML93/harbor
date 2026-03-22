@@ -8,30 +8,42 @@ interface Props {
   onDelete: () => void;
 }
 
+function nameToHue(name: string): number {
+  return name.split("").reduce((h, c) => h + c.charCodeAt(0), 0) % 360;
+}
+
 export function ServiceTile({ service, onEdit, onDelete }: Props) {
   const [menuOpen, setMenuOpen] = useState(false);
+  const hue = nameToHue(service.name);
 
   return (
     <div
-      className="harbor-card group relative flex flex-col gap-2 p-4 transition-shadow hover:shadow-md"
-      style={{ backgroundColor: "var(--color-card)" }}
+      className="harbor-card group relative px-3 py-2.5"
+      onMouseEnter={(e) => {
+        (e.currentTarget as HTMLElement).style.borderColor = "var(--color-accent)";
+      }}
+      onMouseLeave={(e) => {
+        (e.currentTarget as HTMLElement).style.borderColor = "";
+      }}
     >
       {/* Main link area */}
       <a
         href={service.url}
         target="_blank"
         rel="noopener noreferrer"
-        className="flex items-start gap-3"
+        className="flex items-center gap-3"
       >
         <div
-          className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-lg text-lg"
-          style={{ backgroundColor: "var(--color-accent-dim)", color: "var(--color-accent)" }}
+          className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-lg transition-transform duration-150 group-hover:scale-105"
+          style={{
+            backgroundColor: `hsla(${hue}, 60%, 45%, 0.12)`,
+            color: `hsl(${hue}, 60%, 45%)`,
+          }}
         >
-          {/* Placeholder icon — swap for actual icon library integration */}
           <span className="text-sm font-bold">{service.name[0].toUpperCase()}</span>
         </div>
         <div className="min-w-0 flex-1">
-          <div className="flex items-center gap-1">
+          <div className="flex items-center gap-1.5">
             <span
               className="truncate text-sm font-medium"
               style={{ color: "var(--color-text)" }}
@@ -46,7 +58,7 @@ export function ServiceTile({ service, onEdit, onDelete }: Props) {
           </div>
           {service.description && (
             <p
-              className="mt-0.5 truncate text-xs"
+              className="truncate text-xs"
               style={{ color: "var(--color-muted)" }}
             >
               {service.description}
@@ -56,7 +68,7 @@ export function ServiceTile({ service, onEdit, onDelete }: Props) {
       </a>
 
       {/* Context menu */}
-      <div className="absolute right-2 top-2">
+      <div className="absolute right-2 top-1/2 -translate-y-1/2">
         <button
           onClick={(e) => {
             e.stopPropagation();
@@ -78,7 +90,7 @@ export function ServiceTile({ service, onEdit, onDelete }: Props) {
           <>
             <div className="fixed inset-0 z-10" onClick={() => setMenuOpen(false)} />
             <div
-              className="absolute right-0 z-20 mt-1 w-28 overflow-hidden rounded-lg border py-1 shadow-lg"
+              className="absolute right-0 z-20 mt-1 w-28 overflow-hidden rounded-lg border py-1 shadow-lg animate-scale-in"
               style={{
                 backgroundColor: "var(--color-surface)",
                 borderColor: "var(--color-border)",

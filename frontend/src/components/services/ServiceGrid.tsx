@@ -17,15 +17,16 @@ function groupByCategory(services: ServiceItem[]): Record<string, ServiceItem[]>
   }, {});
 }
 
+const GRID_CLASSES = "grid gap-3 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5";
+
 export function ServiceGrid({ services, loading, onEdit, onDelete }: Props) {
   if (loading) {
     return (
-      <div className="grid gap-3 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
-        {Array.from({ length: 8 }).map((_, i) => (
+      <div className={GRID_CLASSES}>
+        {Array.from({ length: 10 }).map((_, i) => (
           <div
             key={i}
-            className="harbor-card h-24 animate-pulse"
-            style={{ backgroundColor: "var(--color-card)" }}
+            className="harbor-card h-[58px] animate-pulse"
           />
         ))}
       </div>
@@ -52,7 +53,7 @@ export function ServiceGrid({ services, loading, onEdit, onDelete }: Props) {
           <h3 className="mb-3 text-xs font-medium uppercase tracking-wider" style={{ color: "var(--color-muted)" }}>
             {category}
           </h3>
-          <div className="grid gap-3 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
+          <div className={GRID_CLASSES}>
             {items.map((service) => (
               <ServiceTile
                 key={service.name}
