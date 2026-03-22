@@ -35,7 +35,7 @@
   --color-bg: #f6f8fa;
   --color-surface: #ffffff;
   --color-card: #ffffff;
-  --color-border: #d0d7de;
+  --color-border: #e1e4e8;
   --color-accent: #0969da;
   --color-accent-hover: #0550ae;
   --color-accent-dim: rgba(9, 105, 218, 0.1);
@@ -47,10 +47,10 @@
   --color-warning-dim: rgba(154, 103, 0, 0.1);
   --color-danger: #cf222e;
   --color-danger-dim: rgba(207, 34, 46, 0.1);
-  --color-card-hover: #f8fafc;
-  --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.04);
-  --shadow-card: 0 1px 3px rgba(0, 0, 0, 0.06), 0 1px 2px rgba(0, 0, 0, 0.04);
-  --shadow-card-hover: 0 4px 12px rgba(0, 0, 0, 0.08), 0 1px 3px rgba(0, 0, 0, 0.06);
+  --color-card-hover: #f3f6f9;
+  --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.06);
+  --shadow-card: 0 1px 3px rgba(0, 0, 0, 0.08), 0 1px 2px rgba(0, 0, 0, 0.06);
+  --shadow-card-hover: 0 4px 14px rgba(0, 0, 0, 0.1), 0 2px 4px rgba(0, 0, 0, 0.06);
 }
 
 /* ==========================================================================
