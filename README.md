@@ -84,6 +84,14 @@ docker run --rm python:3.11-slim python -c \
 
 Replace `yourpassword` with your actual password. Paste the output as `PASSWORD_HASH`.
 
+> **Important:** bcrypt hashes contain `$` signs. In your `.env` file, wrap the value in **single quotes** to prevent Docker Compose from treating `$` as variable substitution:
+>
+> ```env
+> PASSWORD_HASH='$2b$12$abcdef...'
+> ```
+>
+> Double quotes or no quotes will cause authentication to fail silently.
+
 ### 4. Set up services (optional)
 
 ```bash
@@ -103,7 +111,7 @@ First run will build the images, which takes a minute or two.
 ### 6. Open the dashboard
 
 ```
-http://localhost:3000
+http://localhost:3113
 ```
 
 Log in with the password you hashed above.
@@ -123,16 +131,35 @@ All configuration is via environment variables. Copy `.env.example` to `.env` â€
 | `DOCKER_SOCKET` | No | `unix:///var/run/docker.sock` | Docker socket path. Change for rootless Docker. |
 | `DATABASE_URL` | No | `sqlite:///./data/harbor.db` | SQLite path. The `data/` directory is bind-mounted by default. |
 | `SERVICES_CONFIG_PATH` | No | `./services.yml` | Path to your services config file. |
-| `CORS_ORIGINS` | No | `http://localhost:3000,...` | Allowed CORS origins. Only needed when running the backend standalone in dev. |
+| `CORS_ORIGINS` | No | `http://localhost:3113,...` | Allowed CORS origins. Only needed when running the backend standalone in dev. |
 
 ### Changing the port
 
-Harbor runs on port `3000` by default. To change it, edit `docker-compose.yml`:
+Harbor runs on port `3113` by default. To change it, edit `docker-compose.yml`:
 
 ```yaml
 ports:
-  - "8080:80"   # change 3000 to whatever port you want
+  - "8080:80"   # change 3113 to whatever port you want
 ```
+
+### Data volume
+
+The `docker-compose.yml` bind-mounts `./backend/data` for SQLite persistence. Update this path to match your server's appdata location. On **OpenMediaVault (OMV)**, a typical pattern is:
+
+```yaml
+volumes:
+  - /srv/dev-disk-by-uuid-xxxx/appdata/harbor/data:/app/data
+```
+
+### Docker socket access (OMV / non-root)
+
+The compose file includes `group_add: ["982"]` so the backend container can read the Docker socket without running as root. **This GID is specific to OMV** â€” it may differ on your system. Check your Docker group GID with:
+
+```bash
+getent group docker
+```
+
+Update the `group_add` value in `docker-compose.yml` to match.
 
 ### Rootless Docker
 
