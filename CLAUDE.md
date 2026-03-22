@@ -207,6 +207,17 @@ except Exception:
 
 **Don't add features outside the current phase.** Check `BUILD_PLAN.md` for scope. The deferred section lists things explicitly not in scope for Phase 1.
 
+**Don't use `X | None` union syntax in SQLAlchemy `Mapped[]` annotations.** Python 3.14 changed how PEP 604 unions (`str | None`) evaluate — they become `types.UnionType` rather than `typing.Union`, which SQLAlchemy's type introspection rejects with `TypeError: descriptor '__getitem__' requires a 'typing.Union' object`. Use `Optional[X]` from `typing` instead throughout all models:
+```python
+# Bad — breaks on Python 3.14
+webhook_url: Mapped[str | None] = mapped_column(String, nullable=True)
+
+# Good
+from typing import Optional
+webhook_url: Mapped[Optional[str]] = mapped_column(String, nullable=True)
+```
+This applies to all `Mapped[]` annotations in `app/models/`. Pydantic schemas are unaffected but use `Optional[X]` there too for consistency.
+
 ---
 
 ## Environment Variables
