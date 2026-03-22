@@ -1,4 +1,5 @@
 from datetime import datetime
+from typing import Optional
 
 from sqlalchemy import Boolean, DateTime, ForeignKey, Integer, String, func
 from sqlalchemy.orm import Mapped, mapped_column, relationship
@@ -14,7 +15,7 @@ class NotificationRule(Base):
     container_name: Mapped[str] = mapped_column(String, nullable=False)
     enabled: Mapped[bool] = mapped_column(Boolean, nullable=False, default=True)
     down_threshold_minutes: Mapped[int] = mapped_column(Integer, nullable=False, default=5)
-    webhook_url: Mapped[str | None] = mapped_column(String, nullable=True)
+    webhook_url: Mapped[Optional[str]] = mapped_column(String, nullable=True)
     created_at: Mapped[datetime] = mapped_column(DateTime, server_default=func.now())
 
     logs: Mapped[list["NotificationLog"]] = relationship(
@@ -26,13 +27,13 @@ class NotificationLog(Base):
     __tablename__ = "notification_log"
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True)
-    rule_id: Mapped[int | None] = mapped_column(
+    rule_id: Mapped[Optional[int]] = mapped_column(
         Integer, ForeignKey("notification_rules.id", ondelete="SET NULL"), nullable=True
     )
     container_name: Mapped[str] = mapped_column(String, nullable=False)
     message: Mapped[str] = mapped_column(String, nullable=False)
     sent_at: Mapped[datetime] = mapped_column(DateTime, server_default=func.now())
 
-    rule: Mapped["NotificationRule | None"] = relationship(
+    rule: Mapped[Optional["NotificationRule"]] = relationship(
         "NotificationRule", back_populates="logs"
     )
