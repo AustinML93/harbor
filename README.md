@@ -99,7 +99,7 @@ cp services.example.yml services.yml
 chmod 666 services.yml
 ```
 
-The `chmod` is required so the container user can write back to the file — without it, editing or deleting services from the UI will return 500 errors.
+Make the file writable by the container. Without this, services can be viewed but not added, edited, or deleted from the UI.
 
 Edit `services.yml` to add your homelab services — Grafana, Portainer, Nextcloud, whatever you're running. The example file has common ones to start from. You can also skip this and add services from the UI later.
 

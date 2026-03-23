@@ -123,6 +123,7 @@ Configurable tiles for navigating to homelab services.
 - `[ ]` Frontend: Drag-to-reorder (nice-to-have, defer if complex)
 - `[ ]` Frontend: Category grouping / filter tabs
 - `[ ]` **Backlog:** Auto-discovery — scan running containers for known service images (Grafana, Portainer, etc.) and offer to add them as tiles
+- `[ ]` **Backlog:** `services.yml` permissions — currently requires manual `chmod 666` on the host file. Fix by adding a backend startup check that warns if `services.yml` is not writable, or by setting correct ownership in the Dockerfile entrypoint.
 
 ### Acceptance Criteria
 - `services.yml` additions appear in UI on next page load
