@@ -184,13 +184,13 @@ The `services.yml` file defines the quick-launch tiles on the Services page. It'
 services:
   - name: Grafana
     url: http://192.168.1.100:3000
-    icon: chart-bar
+    icon: grafana
     description: Metrics & dashboards
     category: Monitoring
 
   - name: Portainer
     url: http://192.168.1.100:9000
-    icon: server
+    icon: portainer
     description: Container management
     category: Infrastructure
 ```
@@ -201,9 +201,20 @@ services:
 |-------|----------|-------------|
 | `name` | **Yes** | Display name shown on the tile |
 | `url` | **Yes** | Full URL — opened in a new tab when clicked |
-| `icon` | No | Icon name (default: `globe-alt`) |
+| `icon` | No | Dashboard icon slug (auto-matched from name if omitted) |
 | `description` | No | One-line description shown below the name |
 | `category` | No | Groups tiles by section (default: `General`) |
+
+### Service icons
+
+Service tiles display icons from [homarr-labs/dashboard-icons](https://github.com/homarr-labs/dashboard-icons) via jsDelivr CDN. Icons are matched in this order:
+
+1. **Icon slug** — if the `icon` field is set, loads `cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/png/{slug}.png`
+2. **Auto-match** — if `icon` is empty, the service name is lowercased and hyphenated (e.g. "Home Assistant" → `home-assistant`) and used as the slug
+3. **Favicon fallback** — if the CDN icon fails to load, tries `{service-url}/favicon.ico`
+4. **Letter avatar** — if all else fails, shows a colored letter avatar
+
+The add/edit form includes a searchable icon picker with 60+ curated homelab slugs and live CDN previews. You can also type any custom slug from the [full icon list](https://github.com/homarr-labs/dashboard-icons/tree/main/png).
 
 Services are editable from the UI — you don't have to hand-edit the YAML file after initial setup. Changes made in the UI write back to `services.yml`.
 

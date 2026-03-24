@@ -5,108 +5,105 @@
 # Fields:
 #   name        (required) Display name
 #   url         (required) Full URL — opened in a new tab
-#   icon        (optional) Heroicon name (https://heroicons.com)  Default: "globe-alt"
+#   icon        (optional) Dashboard icon slug from homarr-labs/dashboard-icons
+#                          Auto-matched from name (case-insensitive) if omitted.
+#                          Browse: https://github.com/homarr-labs/dashboard-icons/tree/main/png
 #   description (optional) Short one-line description
 #   category    (optional) Groups tiles by category. Default: "General"
-#
-# Icons: Use any name from heroicons.com (outline style), e.g.:
-#   chart-bar, server, shield-check, cloud, code-bracket, cog-6-tooth,
-#   film, globe-alt, home, key, link, lock-closed, magnifying-glass,
-#   paper-airplane, photo, play, queue-list, signal, tv, wifi
 
 services:
   # ── Monitoring ──────────────────────────────────────────────────────────────
   - name: Grafana
     url: http://192.168.1.100:3000
-    icon: chart-bar
+    icon: grafana
     description: Metrics, dashboards & alerting
     category: Monitoring
 
   - name: Prometheus
     url: http://192.168.1.100:9090
-    icon: signal
+    icon: prometheus
     description: Metrics collection & storage
     category: Monitoring
 
   - name: Uptime Kuma
     url: http://192.168.1.100:3001
-    icon: shield-check
+    icon: uptime-kuma
     description: Service uptime monitoring
     category: Monitoring
 
   # ── Infrastructure ───────────────────────────────────────────────────────────
   - name: Portainer
     url: http://192.168.1.100:9000
-    icon: server
+    icon: portainer
     description: Docker container management
     category: Infrastructure
 
   - name: Traefik
     url: http://192.168.1.100:8080
-    icon: globe-alt
+    icon: traefik
     description: Reverse proxy & load balancer
     category: Infrastructure
 
   - name: Pi-hole
     url: http://192.168.1.100:8053/admin
-    icon: shield-check
+    icon: pi-hole
     description: Network-wide ad blocking
     category: Infrastructure
 
   # ── Media ────────────────────────────────────────────────────────────────────
   - name: Plex
     url: http://192.168.1.100:32400/web
-    icon: tv
+    icon: plex
     description: Media server
     category: Media
 
   - name: Jellyfin
     url: http://192.168.1.100:8096
-    icon: film
+    icon: jellyfin
     description: Open source media system
     category: Media
 
   - name: Sonarr
     url: http://192.168.1.100:8989
-    icon: queue-list
+    icon: sonarr
     description: TV series management
     category: Media
 
   - name: Radarr
     url: http://192.168.1.100:7878
-    icon: photo
+    icon: radarr
     description: Movie management
     category: Media
 
   # ── Storage ──────────────────────────────────────────────────────────────────
   - name: Nextcloud
     url: http://192.168.1.100:8080
-    icon: cloud
+    icon: nextcloud
     description: Self-hosted cloud storage
     category: Storage
 
   - name: Filebrowser
     url: http://192.168.1.100:8082
-    icon: folder-open
+    icon: filebrowser
     description: Web-based file manager
     category: Storage
 
   # ── Security ─────────────────────────────────────────────────────────────────
   - name: Vaultwarden
     url: http://192.168.1.100:8088
-    icon: key
+    icon: vaultwarden
     description: Bitwarden-compatible password manager
     category: Security
 
   - name: Authelia
     url: http://192.168.1.100:9091
-    icon: lock-closed
+    icon: authelia
     description: SSO & 2FA gateway
     category: Security
 
   # ── Home Automation ──────────────────────────────────────────────────────────
   - name: Home Assistant
     url: http://192.168.1.100:8123
-    icon: home
+    icon: home-assistant
     description: Home automation platform
     category: Home

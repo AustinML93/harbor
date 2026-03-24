@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { ExternalLink, MoreHorizontal, Pencil, Trash2 } from "lucide-react";
 import type { ServiceItem } from "../../types";
+import { ServiceIcon } from "./ServiceIcon";
 
 interface Props {
   service: ServiceItem;
@@ -8,13 +9,8 @@ interface Props {
   onDelete: () => void;
 }
 
-function nameToHue(name: string): number {
-  return name.split("").reduce((h, c) => h + c.charCodeAt(0), 0) % 360;
-}
-
 export function ServiceTile({ service, onEdit, onDelete }: Props) {
   const [menuOpen, setMenuOpen] = useState(false);
-  const hue = nameToHue(service.name);
 
   return (
     <div
@@ -33,14 +29,8 @@ export function ServiceTile({ service, onEdit, onDelete }: Props) {
         rel="noopener noreferrer"
         className="flex items-center gap-3"
       >
-        <div
-          className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-lg transition-transform duration-150 group-hover:scale-105"
-          style={{
-            backgroundColor: `hsla(${hue}, 60%, 45%, 0.12)`,
-            color: `hsl(${hue}, 60%, 45%)`,
-          }}
-        >
-          <span className="text-sm font-bold">{service.name[0].toUpperCase()}</span>
+        <div className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-lg transition-transform duration-150 group-hover:scale-105">
+          <ServiceIcon slug={service.icon} name={service.name} url={service.url} size={28} />
         </div>
         <div className="min-w-0 flex-1">
           <div className="flex items-center gap-1.5">

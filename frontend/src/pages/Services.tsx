@@ -3,6 +3,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Globe, Plus } from "lucide-react";
 import api from "../lib/api";
 import { ServiceGrid } from "../components/services/ServiceGrid";
+import { IconPicker } from "../components/services/IconPicker";
 import { Modal } from "../components/ui/Modal";
 import { useStore } from "../store";
 import type { ServiceItem } from "../types";
@@ -19,7 +20,7 @@ function ServiceForm({
   const [form, setForm] = useState<ServiceItem>({
     name: initial?.name ?? "",
     url: initial?.url ?? "",
-    icon: initial?.icon ?? "globe-alt",
+    icon: initial?.icon ?? "",
     description: initial?.description ?? "",
     category: initial?.category ?? "General",
   });
@@ -30,22 +31,45 @@ function ServiceForm({
       setForm((f) => ({ ...f, [key]: e.target.value })),
   });
 
+  // Auto-match icon slug from service name when name changes and icon is empty or was auto-set
+  const autoSlug = form.name.toLowerCase().replace(/\s+/g, "-");
+
   return (
     <form
       onSubmit={(e) => {
         e.preventDefault();
-        onSave(form);
+        // If no icon was explicitly picked, use the auto-slug from the name
+        const submitted = { ...form, icon: form.icon || autoSlug };
+        onSave(submitted);
       }}
       className="space-y-3"
     >
-      {(["name", "url", "icon", "description", "category"] as const).map((key) => (
-        <div key={key}>
-          <label className="mb-1 block text-sm capitalize" style={{ color: "var(--color-muted)" }}>
-            {key}
-          </label>
-          <input className="harbor-input" {...field(key)} required={key === "name" || key === "url"} />
-        </div>
-      ))}
+      <div>
+        <label className="mb-1 block text-sm" style={{ color: "var(--color-muted)" }}>Name</label>
+        <input className="harbor-input" {...field("name")} required />
+      </div>
+      <div>
+        <label className="mb-1 block text-sm" style={{ color: "var(--color-muted)" }}>URL</label>
+        <input className="harbor-input" {...field("url")} required />
+      </div>
+      <div>
+        <label className="mb-1 block text-sm" style={{ color: "var(--color-muted)" }}>Icon</label>
+        <IconPicker
+          value={form.icon || autoSlug}
+          onChange={(slug) => setForm((f) => ({ ...f, icon: slug }))}
+        />
+        <p className="mt-1 text-xs" style={{ color: "var(--color-muted)" }}>
+          Auto-matched from name. Click to browse or type a custom slug.
+        </p>
+      </div>
+      <div>
+        <label className="mb-1 block text-sm" style={{ color: "var(--color-muted)" }}>Description</label>
+        <input className="harbor-input" {...field("description")} />
+      </div>
+      <div>
+        <label className="mb-1 block text-sm" style={{ color: "var(--color-muted)" }}>Category</label>
+        <input className="harbor-input" {...field("category")} />
+      </div>
       <div className="flex justify-end gap-2 pt-2">
         <button type="button" onClick={onCancel} className="harbor-btn-ghost">
           Cancel
