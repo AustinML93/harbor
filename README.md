@@ -121,13 +121,22 @@ Log in with the password you hashed above.
 
 ### Updating
 
-To pull the latest code and rebuild:
+A one-command deploy script is included for OMV and Linux servers:
 
 ```bash
+chmod +x deploy.sh   # first time only
 ./deploy.sh
 ```
 
-This stashes local changes, pulls, restores your changes, and rebuilds containers from scratch. Use `./deploy.sh --cache` for faster rebuilds when only application code changed.
+The script runs through 6 steps with clear status output:
+1. Stashes any local changes (`.env`, `services.yml`, etc.)
+2. Pulls latest code from GitHub
+3. Prints the 3 most recent commits so you can verify what changed
+4. Stops running containers
+5. Rebuilds images from scratch (no cache)
+6. Starts containers
+
+Your stashed changes are preserved — run `git stash pop` after deploying to restore them.
 
 ---
 

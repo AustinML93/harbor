@@ -1,37 +1,50 @@
 #!/bin/bash
-# Harbor deploy/update script
+# Harbor deploy/update script for OMV and Linux servers.
 # Pulls latest code and rebuilds containers. Safe to run repeatedly.
 #
 # Usage: ./deploy.sh
-#        ./deploy.sh --cache   # skip --no-cache for faster rebuilds
 
 set -e
 
 cd "$(dirname "$0")"
 
-echo "==> Stashing local changes..."
-git stash --include-untracked 2>/dev/null || true
+echo ""
+echo "========================================="
+echo "  Harbor — Deploy / Update"
+echo "========================================="
+echo ""
 
-echo "==> Pulling latest code..."
+echo "[1/6] Stashing local changes..."
+git stash --include-untracked 2>/dev/null && echo "      Local changes stashed." || echo "      No local changes to stash."
+
+echo ""
+echo "[2/6] Pulling latest code..."
 git pull
+echo ""
 
-echo "==> Restoring local changes..."
-git stash pop 2>/dev/null || true
+echo "[3/6] Latest commits:"
+echo "      ---"
+git log --oneline -3 | sed 's/^/      /'
+echo "      ---"
+echo ""
 
-echo "==> Stopping containers..."
+echo "[4/6] Stopping containers..."
 docker compose down
+echo ""
 
-BUILD_FLAGS=""
-if [ "$1" != "--cache" ]; then
-  BUILD_FLAGS="--no-cache"
-fi
+echo "[5/6] Building images (no cache)..."
+docker compose build --no-cache
+echo ""
 
-echo "==> Building images${BUILD_FLAGS:+ (no cache)}..."
-docker compose build $BUILD_FLAGS
-
-echo "==> Starting containers..."
+echo "[6/6] Starting containers..."
 docker compose up -d
+echo ""
 
-echo "==> Done. Harbor is starting on port 3113."
-echo "    Check status: docker compose ps"
-echo "    View logs:    docker compose logs -f"
+echo "========================================="
+echo "  Harbor is running on port 3113"
+echo "========================================="
+echo ""
+echo "  Check status:  docker compose ps"
+echo "  View logs:     docker compose logs -f"
+echo "  Restore stash: git stash pop"
+echo ""
