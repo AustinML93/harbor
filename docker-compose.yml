@@ -17,7 +17,10 @@ services:
     volumes:
       # Docker socket — required for container management
       - /var/run/docker.sock:/var/run/docker.sock:ro
-      # SQLite database persistence
+      # SQLite database persistence — change to an absolute path for your system, e.g.:
+      #   /srv/dev-disk-by-uuid-xxxx/appdata/harbor/data:/app/data  (OMV)
+      #   /opt/harbor/data:/app/data                                 (generic Linux)
+      # The entrypoint chowns this directory at startup, so host ownership doesn't matter.
       - ./backend/data:/app/data
       # Services config — edit this file to add quick-launch tiles
       - ./services.yml:/app/services.yml

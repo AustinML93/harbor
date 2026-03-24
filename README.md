@@ -119,6 +119,16 @@ http://localhost:3113
 
 Log in with the password you hashed above.
 
+### Updating
+
+To pull the latest code and rebuild:
+
+```bash
+./deploy.sh
+```
+
+This stashes local changes, pulls, restores your changes, and rebuilds containers from scratch. Use `./deploy.sh --cache` for faster rebuilds when only application code changed.
+
 ---
 
 ## Configuration

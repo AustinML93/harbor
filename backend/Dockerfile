@@ -5,9 +5,10 @@ RUN groupadd -r harbor && useradd -r -g harbor harbor
 
 WORKDIR /app
 
-# Install system deps (curl for healthcheck)
+# Install system deps (curl for healthcheck, gosu for entrypoint user switching)
 RUN apt-get update && apt-get install -y --no-install-recommends \
     curl \
+    gosu \
     && rm -rf /var/lib/apt/lists/*
 
 # Install Python deps first (layer cache)
@@ -17,12 +18,14 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Copy application code
 COPY app/ ./app/
 
-# Create data directory with correct permissions
-RUN mkdir -p /app/data && chown -R harbor:harbor /app/data
+# Create data directory
+RUN mkdir -p /app/data
 
-# Switch to non-root user
-USER harbor
+# Copy entrypoint script
+COPY entrypoint.sh /entrypoint.sh
+RUN chmod +x /entrypoint.sh
 
 EXPOSE 8000
 
+ENTRYPOINT ["/entrypoint.sh"]
 CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
