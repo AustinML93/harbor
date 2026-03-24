@@ -30,7 +30,7 @@ export function ServiceTile({ service, onEdit, onDelete }: Props) {
         className="flex items-center gap-3"
       >
         <div className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-lg transition-transform duration-150 group-hover:scale-105">
-          <ServiceIcon slug={service.icon} name={service.name} url={service.url} size={28} />
+          <ServiceIcon key={service.icon} slug={service.icon} name={service.name} url={service.url} size={28} />
         </div>
         <div className="min-w-0 flex-1">
           <div className="flex items-center gap-1.5">
