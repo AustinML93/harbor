@@ -14,7 +14,7 @@ const ICON_SLUGS = [
   "grocy", "guacamole", "heimdall", "home-assistant", "homepage",
   "homarr", "immich", "jellyfin", "jellyseerr", "kavita",
   "lidarr", "mealie", "minio", "mysql", "n8n",
-  "nextcloud", "nginx", "nginx-proxy-manager", "node-red", "omv",
+  "nextcloud", "nginx", "nginx-proxy-manager", "node-red", "nzbget", "omv",
   "overseerr", "paperless-ngx", "pfsense", "photoprism", "pi-hole",
   "plex", "portainer", "postgres", "prometheus", "prowlarr",
   "proxmox", "qbittorrent", "radarr", "redis", "sonarr",

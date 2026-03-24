@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 const CDN_BASE = "https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/png";
 
@@ -21,6 +21,8 @@ function nameToHue(name: string): number {
  */
 export function ServiceIcon({ slug, name, url, size = 20 }: Props) {
   const [tier, setTier] = useState<1 | 2 | 3>(1);
+
+  useEffect(() => { setTier(1); }, [slug]);
 
   const displayName = name ?? slug;
   const hue = nameToHue(displayName);
