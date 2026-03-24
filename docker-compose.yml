@@ -10,10 +10,8 @@ services:
     container_name: harbor-backend
     restart: unless-stopped
     env_file: .env
-    # Docker group GID on OMV — allows socket access without running as root.
-    # May differ on other systems; check with: getent group docker
-    group_add:
-      - "982"
+    # Docker socket access is handled by the entrypoint via DOCKER_GID env var.
+    # No group_add needed — see .env.example for configuration.
     volumes:
       # Docker socket — required for container management
       - /var/run/docker.sock:/var/run/docker.sock:ro
