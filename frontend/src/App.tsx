@@ -6,7 +6,7 @@ import { useWebSocket } from "./hooks/useWebSocket";
 import Login from "./pages/Login";
 import Dashboard from "./pages/Dashboard";
 import Containers from "./pages/Containers";
-import Services from "./pages/Services";
+import Settings from "./pages/Settings";
 import { Sidebar } from "./components/layout/Sidebar";
 import { TopBar } from "./components/layout/TopBar";
 import { ToastContainer } from "./components/ui/Toast";
@@ -64,11 +64,11 @@ export default function App() {
           }
         />
         <Route
-          path="/services"
+          path="/settings"
           element={
             <ProtectedRoute>
               <AppShell>
-                <Services />
+                <Settings />
               </AppShell>
             </ProtectedRoute>
           }

@@ -16,9 +16,9 @@ export function TopBar() {
   const title = PAGE_TITLES[location.pathname] ?? "Harbor";
 
   return (
-    <header
-      className="flex h-14 flex-shrink-0 items-center justify-between border-b px-6"
-      style={{ backgroundColor: "var(--color-surface)", borderColor: "var(--color-border)" }}
+    <header 
+      className="flex h-16 flex-shrink-0 items-center justify-between px-6 glass-panel"
+      style={{ borderBottomWidth: "1px", zIndex: 10 }}
     >
       <h2 className="text-sm font-semibold" style={{ color: "var(--color-text)" }}>
         {title}

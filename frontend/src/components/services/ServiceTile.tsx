@@ -14,7 +14,7 @@ export function ServiceTile({ service, onEdit, onDelete }: Props) {
 
   return (
     <div
-      className="harbor-card group relative px-3 py-2.5"
+      className="harbor-card group relative px-4 py-3 hover-lift"
       onMouseEnter={(e) => {
         (e.currentTarget as HTMLElement).style.borderColor = "var(--color-accent)";
       }}

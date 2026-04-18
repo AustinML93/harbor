@@ -1,12 +1,12 @@
 import { NavLink, useNavigate } from "react-router-dom";
-import { Anchor, Container, Grid3X3, LayoutDashboard, LogOut, Moon, Sun } from "lucide-react";
+import { Anchor, Container, LayoutDashboard, Settings, LogOut, Moon, Sun } from "lucide-react";
 import { useStore } from "../../store";
 import { clearToken } from "../../lib/auth";
 
 const NAV_ITEMS = [
   { to: "/", label: "Dashboard", icon: LayoutDashboard },
   { to: "/containers", label: "Containers", icon: Container },
-  { to: "/services", label: "Services", icon: Grid3X3 },
+  { to: "/settings", label: "Settings", icon: Settings },
 ];
 
 export function Sidebar() {
@@ -21,11 +21,8 @@ export function Sidebar() {
 
   return (
     <aside
-      className="flex w-56 flex-shrink-0 flex-col"
-      style={{
-        backgroundColor: "var(--color-surface)",
-        boxShadow: "inset -1px 0 0 var(--color-border)",
-      }}
+      className="flex w-64 flex-shrink-0 flex-col glass-panel"
+      style={{ borderRightWidth: "1px", zIndex: 20 }}
     >
       {/* Logo */}
       <div

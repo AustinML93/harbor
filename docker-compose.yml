@@ -19,9 +19,9 @@ services:
       #   /srv/dev-disk-by-uuid-xxxx/appdata/harbor/data:/app/data  (OMV)
       #   /opt/harbor/data:/app/data                                 (generic Linux)
       # The entrypoint chowns this directory at startup, so host ownership doesn't matter.
-      - ./backend/data:/app/data
+      - ${HARBOR_DATA_PATH:-./backend/data}:/app/data
       # Services config — edit this file to add quick-launch tiles
-      - ./services.yml:/app/services.yml
+      - ${HARBOR_CONFIG_PATH:-./services.yml}:/app/services.yml
     networks:
       - harbor-internal
     healthcheck:

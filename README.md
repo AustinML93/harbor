@@ -54,70 +54,26 @@ git clone https://github.com/yourusername/harbor.git
 cd harbor
 ```
 
-### 2. Generate a secret key
+### 2. Run the installer
 
 ```bash
-openssl rand -hex 32
+chmod +x install.sh
+./install.sh
 ```
 
-Copy the output — you'll need it in the next step.
+This non-interactive script will automatically generate your `.env` file, configure Docker socket permissions, set a default password, and start the containers.
 
-### 3. Configure your environment
-
-```bash
-cp .env.example .env
-```
-
-Open `.env` and set two required values:
-
-```env
-SECRET_KEY=<paste your generated key here>
-PASSWORD_HASH=<see below>
-```
-
-**Generate a password hash:**
-
-```bash
-docker run --rm python:3.11-slim python -c \
-  "import bcrypt; print(bcrypt.hashpw(b'yourpassword', bcrypt.gensalt()).decode())"
-```
-
-Replace `yourpassword` with your actual password. Paste the output as `PASSWORD_HASH`.
-
-> **Important:** bcrypt hashes contain `$` signs. In your `.env` file, wrap the value in **single quotes** to prevent Docker Compose from treating `$` as variable substitution:
->
-> ```env
-> PASSWORD_HASH='$2b$12$abcdef...'
-> ```
->
-> Double quotes or no quotes will cause authentication to fail silently.
-
-### 4. Set up services (optional)
-
-```bash
-cp services.example.yml services.yml
-chmod 666 services.yml
-```
-
-Make the file writable by the container. Without this, services can be viewed but not added, edited, or deleted from the UI.
-
-Edit `services.yml` to add your homelab services — Grafana, Portainer, Nextcloud, whatever you're running. The example file has common ones to start from. You can also skip this and add services from the UI later.
-
-### 5. Start Harbor
-
-```bash
-docker compose up -d
-```
-
-First run will build the images, which takes a minute or two.
-
-### 6. Open the dashboard
+### 3. Open the dashboard
 
 ```
 http://localhost:3113
 ```
 
-Log in with the password you hashed above.
+Log in with the default credentials:
+- **Username:** `admin` (or any string, currently single-user)
+- **Password:** `admin`
+
+> **Important:** Change your password from the UI immediately after logging in!
 
 ### Updating
 
