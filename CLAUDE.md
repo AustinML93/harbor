@@ -1,3 +1,7 @@
+# CLAUDE.md
+
+This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+
 # Harbor — Claude Code Context
 
 ## Project Overview
@@ -30,6 +34,7 @@ See `ARCHITECTURE.md` for the full system design and `BUILD_PLAN.md` for phased 
 | Build tool | Vite |
 | Styling | Tailwind CSS with CSS custom properties |
 | State | Zustand (global) + TanStack Query (server state) |
+| Charts | Recharts (sparklines, history graphs) |
 | HTTP client | Axios |
 | Router | React Router v6 |
 | Real-time | Native WebSocket API |
@@ -74,11 +79,30 @@ docker compose up -d
 # Harbor available at http://localhost:3000
 ```
 
+### Lint and type-check
+
+**Backend (ruff):**
+```bash
+cd backend
+ruff check .
+ruff format .
+```
+
+**Frontend:**
+```bash
+cd frontend
+npm run lint       # ESLint
+npx tsc --noEmit   # Type-check without emitting
+```
+
 ### Run tests
 ```bash
 cd backend
-pytest
+pytest                                           # all tests
+pytest tests/path/test_file.py::test_name -v    # single test
 ```
+
+> Note: there are currently no tests in the repo. The test suite will be populated as the project matures.
 
 ---
 
@@ -155,11 +179,14 @@ export function ContainerCard({ container, onAction }: Props) { ... }
 | `backend/app/api/deps.py` | `get_current_user` FastAPI dependency (JWT validation) |
 | `backend/app/ws/manager.py` | WebSocket `ConnectionManager` + async broadcast loop |
 | `backend/app/services/docker_service.py` | All Docker SDK interactions |
-| `backend/app/services/system_service.py` | All psutil interactions |
+| `backend/app/services/system_service.py` | All psutil interactions + 5-min history writes |
 | `backend/app/services/notifier.py` | Notification rule engine |
+| `backend/app/services/services_service.py` | Read/write `services.yml` for quick-launch tiles |
 | `frontend/src/App.tsx` | Router setup, `ProtectedRoute` wrapper |
 | `frontend/src/store/index.ts` | Zustand store: auth state, live stats, container list |
 | `frontend/src/hooks/useWebSocket.ts` | WS connection lifecycle, reconnect logic, message dispatch |
+| `frontend/src/hooks/useContainers.ts` | TanStack Query hook for container REST calls |
+| `frontend/src/hooks/useSystemStats.ts` | Selects system stats slice from Zustand store |
 | `frontend/src/lib/api.ts` | Axios instance with base URL + JWT Bearer interceptor |
 | `frontend/src/index.css` | Tailwind directives + CSS custom properties for theming |
 | `frontend/tailwind.config.ts` | Tailwind theme extension with CSS variable color aliases |
@@ -238,10 +265,10 @@ See `.env.example` for all variables with documentation. The critical ones:
 All WebSocket messages are JSON with a `type` discriminator:
 
 ```typescript
-// System stats (every ~1s)
+// System stats (every 1s)
 { type: "stats", data: { cpu: 23.4, ram: 67.1, disk: 45.0, net_rx: 1024, net_tx: 512 } }
 
-// Container list (every ~5s, on change)
+// Container list (every 5s)
 { type: "containers", data: [ { id, name, image, state, uptime_pct } ] }
 
 // Error
@@ -250,6 +277,14 @@ All WebSocket messages are JSON with a `type` discriminator:
 // Pong (response to client ping)
 { type: "pong" }
 ```
+
+**Broadcast loop timing** (`ws/manager.py → broadcast_loop`):
+- Every 1s — system stats via psutil
+- Every 5s — container list via Docker SDK + uptime event recording
+- Every 30s — notification rule engine (`notifier.check_and_fire`)
+- Every 300s (5 min) — system stats history written to SQLite (`system_stats` table)
+
+Blocking sync calls (psutil, Docker SDK) are offloaded with `run_in_executor` so they never stall the event loop.
 
 ---
 

@@ -281,5 +281,37 @@ class DockerService:
             _reset_client()
             return {}
 
+    def discover_services(self) -> list[dict]:
+        """Return running containers that expose host ports, formatted as service candidates."""
+        try:
+            client = _get_client()
+            containers = client.containers.list()
+        except DockerException as e:
+            _reset_client()
+            logger.warning("Docker unavailable during service discovery: %s", e)
+            return []
+
+        discovered = []
+        for c in containers:
+            name = c.name.lstrip("/")
+            ports = c.attrs.get("NetworkSettings", {}).get("Ports", {})
+            public_port = None
+            for _container_port, bindings in ports.items():
+                if bindings:
+                    public_port = bindings[0].get("HostPort")
+                    break
+
+            if public_port:
+                slug = name.lower().replace(" ", "-")
+                discovered.append({
+                    "name": name.capitalize(),
+                    "url": f"http://localhost:{public_port}",
+                    "icon": slug,
+                    "description": "Auto-discovered service",
+                    "category": "Discovered",
+                })
+
+        return discovered
+
 
 docker_service = DockerService()

@@ -35,7 +35,7 @@ export function useSystemStats() {
   });
 
   if (!stats) {
-    return { stats: null, formatted: null, history: [], historyLoading: true };
+    return { stats: null, formatted: null, history, historyLoading };
   }
 
   const formatted = {

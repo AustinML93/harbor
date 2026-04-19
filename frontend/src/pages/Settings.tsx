@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { isAxiosError } from "axios";
 import { KeyRound } from "lucide-react";
 import api from "../lib/api";
 import { useStore } from "../store";
@@ -27,10 +28,10 @@ export default function Settings() {
       setCurrentPassword("");
       setNewPassword("");
       setConfirmPassword("");
-    } catch (err: any) {
-      addToast({ 
-        type: "error", 
-        message: err.response?.data?.detail || "Failed to change password" 
+    } catch (err) {
+      addToast({
+        type: "error",
+        message: isAxiosError(err) ? (err.response?.data?.detail ?? "Failed to change password") : "Failed to change password",
       });
     } finally {
       setLoading(false);

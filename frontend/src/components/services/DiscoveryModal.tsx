@@ -63,7 +63,7 @@ export function DiscoveryModal({
     <Modal isOpen={isOpen} onClose={onClose} title="Discover Services">
       <div className="space-y-4">
         {loading ? (
-          <div className="flex flex-col items-center justify-center py-12 text-sm text-gray-500">
+          <div className="flex flex-col items-center justify-center py-12 text-sm" style={{ color: "var(--color-muted)" }}>
             <Loader2 className="animate-spin mb-2" size={24} />
             Scanning running containers...
           </div>

@@ -4,7 +4,7 @@ import psutil
 
 from app.schemas.system import DiskInfo, SystemStats
 
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 
 from app.core.database import SessionLocal
 from app.models.system_stat import SystemStat
@@ -43,8 +43,8 @@ class SystemService:
             )
             db.add(stat_record)
             
-            # Prune records older than 24 hours
-            cutoff = datetime.now() - timedelta(hours=24)
+            # Prune records older than 24 hours (naive UTC to match server_default=func.now())
+            cutoff = datetime.now(timezone.utc).replace(tzinfo=None) - timedelta(hours=24)
             db.query(SystemStat).filter(SystemStat.timestamp < cutoff).delete()
             db.commit()
 
