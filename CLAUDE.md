@@ -76,8 +76,18 @@ python -c "from app.core.security import get_password_hash; print(get_password_h
 cp .env.example .env
 # Edit .env with your SECRET_KEY and PASSWORD_HASH
 docker compose up -d
-# Harbor available at http://localhost:3000
+# Harbor available at http://localhost:3113
 ```
+
+### Deploy to OMV server
+
+```bash
+ssh deploy@192.168.1.200
+cd /srv/dev-disk-by-uuid-5c291e74-2a76-4eb0-924b-7bf8f9eca72c/compose/harbor
+bash deploy.sh
+```
+
+Harbor runs on **http://192.168.1.200:3113**. The deploy script pulls latest from GitHub, rebuilds images (no cache), and restarts containers. Local `.env` and `services.yml` are preserved via `git stash`.
 
 ### Lint and type-check
 
