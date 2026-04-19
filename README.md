@@ -19,24 +19,11 @@ It's designed to be dead simple to deploy (`docker compose up -d`), opinionated 
 
 ## Screenshots
 
-> Screenshots coming once the UI is complete. Follow along or contribute!
+![Harbor Dashboard](https://raw.githubusercontent.com/AustinML93/harbor/main/docs/dashboard.png)
+*Real-time system health and quick-launch services*
 
-```
-┌─────────────────────────────────────────────────────┐
-│  [Dashboard screenshot will go here]                │
-│  — stat cards, container health grid, live updates  │
-└─────────────────────────────────────────────────────┘
-
-┌─────────────────────────────────────────────────────┐
-│  [Containers screenshot will go here]               │
-│  — table with status badges, start/stop/restart     │
-└─────────────────────────────────────────────────────┘
-
-┌─────────────────────────────────────────────────────┐
-│  [Services screenshot will go here]                 │
-│  — quick-launch tiles grouped by category           │
-└─────────────────────────────────────────────────────┘
-```
+![Container Management](https://raw.githubusercontent.com/AustinML93/harbor/main/docs/containers.png)
+*Manage Docker containers directly from the UI*
 
 ---
 
@@ -191,9 +178,12 @@ Service tiles display icons from [homarr-labs/dashboard-icons](https://github.co
 
 The add/edit form includes a searchable icon picker with 60+ curated homelab slugs and live CDN previews. You can also type any custom slug from the [full icon list](https://github.com/homarr-labs/dashboard-icons/tree/main/png).
 
-Services are editable from the UI — you don't have to hand-edit the YAML file after initial setup. Changes made in the UI write back to `services.yml`.
+### Auto-Discovery
+Don't want to type out all your services? Harbor includes an **Auto-Discovery** feature that scans your running Docker containers for exposed public ports and automatically generates service tiles for you. Access this directly from the Dashboard.
 
-The example file at `services.example.yml` has 15 common homelab services to start from.
+Services are completely editable from the UI — you don't have to hand-edit the YAML file after initial setup. Changes made in the UI instantly write back to `services.yml`.
+
+The example file at `services.example.yml` has 15 common homelab services to start from if you prefer a text-based setup.
 
 ---
 
@@ -201,25 +191,29 @@ The example file at `services.example.yml` has 15 common homelab services to sta
 
 Harbor is being built in phases. Here's where things stand:
 
-### Phase 1 — Core (in progress)
+### Phase 1 — Core (Complete)
 
-- [ ] Dashboard with real-time CPU, RAM, disk, and network stats
-- [ ] Container list with status, uptime, and image info
-- [ ] Start / stop / restart containers from the UI
-- [ ] Container log viewer
-- [ ] Quick-launch service tiles
-- [ ] Real-time updates via WebSocket
-- [ ] Dark / light theme
-- [ ] Single-password authentication with JWT
-- [ ] Mobile responsive layout
+- [x] Dashboard with real-time CPU, RAM, disk, and network stats
+- [x] Container list with status, uptime, and image info
+- [x] Start / stop / restart containers from the UI
+- [x] Container log viewer
+- [x] Quick-launch service tiles with auto-discovery
+- [x] Real-time updates via WebSocket
+- [x] Dark / light theme
+- [x] Single-password authentication with JWT
+- [x] Mobile responsive layout
 
-### Phase 2 — Coming soon
+### Phase 2 — Analytics & Alerting (In Progress)
 
-- [ ] Uptime history graphs (24h / 7d)
+- [x] Historical system stats (CPU, RAM, Disk) with sparkline visualizations
 - [ ] Container down alerts with webhook delivery (Slack, ntfy, Gotify, etc.)
 - [ ] Per-container CPU and RAM sparklines
 - [ ] Notification rule management UI
 - [ ] Alert history log
+
+### Phase 3 — Orchestration (Up Next)
+- Docker Compose / Stack Management (The Portainer Killer)
+- Allow users to deploy new apps, edit configurations, and spin stacks up/down
 
 ### Future / considering
 
