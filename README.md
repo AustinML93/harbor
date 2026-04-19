@@ -90,7 +90,7 @@ All configuration is via environment variables. Copy `.env.example` to `.env` �
 | Variable | Required | Default | Description |
 |----------|----------|---------|-------------|
 | `SECRET_KEY` | **Yes** | — | Random string used to sign JWTs. Generate with `openssl rand -hex 32`. |
-| `PASSWORD_HASH` | **Yes** | — | bcrypt hash of your login password. See Quick Start above. |
+| `PASSWORD_HASH` | **Yes** | — | Initial bcrypt hash for login. Change your password in the UI Settings later. |
 | `JWT_ALGORITHM` | No | `HS256` | JWT signing algorithm. No reason to change this. |
 | `JWT_EXPIRE_MINUTES` | No | `10080` | Session length in minutes. Default is 7 days. |
 | `DOCKER_SOCKET` | No | `unix:///var/run/docker.sock` | Docker socket path. Change for rootless Docker. |
