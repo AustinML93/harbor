@@ -48,7 +48,7 @@ function DockerSummary() {
 }
 
 export default function Dashboard() {
-  const { stats, formatted, history, historyLoading } = useSystemStats();
+  const { stats, formatted, history } = useSystemStats();
   const queryClient = useQueryClient();
   const addToast = useStore((s) => s.addToast);
 

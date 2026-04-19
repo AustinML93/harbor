@@ -52,7 +52,7 @@ async def discover_services(_: str = Depends(get_current_user)):
                 name=name.capitalize(),
                 url=f"http://localhost:{public_port}",
                 icon=slug,
-                description=f"Auto-discovered service",
+                description="Auto-discovered service",
                 category="Discovered"
             ))
             
