@@ -1,4 +1,6 @@
+import { useQuery } from "@tanstack/react-query";
 import { useStore } from "../store";
+import api from "../lib/api";
 
 function formatUptime(seconds: number): string {
   const d = Math.floor(seconds / 86400);
@@ -16,11 +18,24 @@ function formatBytes(bytes: number): string {
   return `${(bytes / 1024 ** 3).toFixed(2)} GB`;
 }
 
+export interface StatHistoryRecord {
+  timestamp: string;
+  cpu_percent: number;
+  ram_percent: number;
+  disk_percent: number;
+}
+
 export function useSystemStats() {
   const stats = useStore((s) => s.stats);
 
+  const { data: history = [], isLoading: historyLoading } = useQuery<StatHistoryRecord[]>({
+    queryKey: ["system-history"],
+    queryFn: () => api.get("/system/history").then((r) => r.data),
+    refetchInterval: 5 * 60 * 1000, // Refetch every 5 minutes to stay somewhat fresh
+  });
+
   if (!stats) {
-    return { stats: null, formatted: null };
+    return { stats: null, formatted: null, history: [], historyLoading: true };
   }
 
   const formatted = {
@@ -34,5 +49,5 @@ export function useSystemStats() {
     uptime: formatUptime(stats.uptime_seconds),
   };
 
-  return { stats, formatted };
+  return { stats, formatted, history, historyLoading };
 }

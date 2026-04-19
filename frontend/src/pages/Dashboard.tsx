@@ -48,7 +48,7 @@ function DockerSummary() {
 }
 
 export default function Dashboard() {
-  const { stats, formatted } = useSystemStats();
+  const { stats, formatted, history, historyLoading } = useSystemStats();
   const queryClient = useQueryClient();
   const addToast = useStore((s) => s.addToast);
 
@@ -191,6 +191,8 @@ export default function Dashboard() {
             accent={{ bg: "var(--color-accent-dim)", fg: "var(--color-accent)" }}
             percent={stats?.cpu_percent}
             loading={!stats}
+            history={history}
+            historyDataKey="cpu_percent"
           />
           <StatCard
             label="RAM"
@@ -199,6 +201,8 @@ export default function Dashboard() {
             accent={{ bg: "var(--color-warning-dim)", fg: "var(--color-warning)" }}
             percent={stats?.ram_percent}
             loading={!stats}
+            history={history}
+            historyDataKey="ram_percent"
           />
           <StatCard
             label="Disk"
@@ -207,6 +211,8 @@ export default function Dashboard() {
             accent={{ bg: "var(--color-success-dim)", fg: "var(--color-success)" }}
             percent={stats?.disk_percent}
             loading={!stats}
+            history={history}
+            historyDataKey="disk_percent"
           />
           <StatCard
             label="Net ↓"

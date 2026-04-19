@@ -4,6 +4,11 @@ import psutil
 
 from app.schemas.system import DiskInfo, SystemStats
 
+from datetime import datetime, timedelta
+
+from app.core.database import SessionLocal
+from app.models.system_stat import SystemStat
+
 _boot_time = psutil.boot_time()
 
 
@@ -28,6 +33,34 @@ class SystemService:
             uptime_seconds=uptime,
         )
 
+    def save_history(self) -> None:
+        stats = self.get_stats()
+        with SessionLocal() as db:
+            stat_record = SystemStat(
+                cpu_percent=stats.cpu_percent,
+                ram_percent=stats.ram_percent,
+                disk_percent=stats.disk_percent,
+            )
+            db.add(stat_record)
+            
+            # Prune records older than 24 hours
+            cutoff = datetime.now() - timedelta(hours=24)
+            db.query(SystemStat).filter(SystemStat.timestamp < cutoff).delete()
+            db.commit()
+
+    def get_history(self) -> list[dict]:
+        with SessionLocal() as db:
+            records = db.query(SystemStat).order_by(SystemStat.timestamp.asc()).all()
+            return [
+                {
+                    "timestamp": r.timestamp.isoformat(),
+                    "cpu_percent": r.cpu_percent,
+                    "ram_percent": r.ram_percent,
+                    "disk_percent": r.disk_percent,
+                }
+                for r in records
+            ]
+
     def get_disks(self) -> list[DiskInfo]:
         disks = []
         for part in psutil.disk_partitions(all=False):
@@ -50,3 +83,4 @@ class SystemService:
 
 
 system_service = SystemService()
+

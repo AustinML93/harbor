@@ -91,11 +91,13 @@ class ConnectionManager:
         loop = asyncio.get_event_loop()
         container_tick = 0
         alert_tick = 0
+        history_tick = 0
 
         while True:
             await asyncio.sleep(1)
             container_tick += 1
             alert_tick += 1
+            history_tick += 1
 
             # System stats — every second
             try:
@@ -123,6 +125,15 @@ class ConnectionManager:
                     await loop.run_in_executor(None, notifier.check_and_fire)
                 except Exception as e:
                     logger.debug("Notifier error: %s", e)
+
+            # History saving — every 5 minutes (300 seconds)
+            if history_tick >= 300:
+                history_tick = 0
+                try:
+                    await loop.run_in_executor(None, system_service.save_history)
+                except Exception as e:
+                    logger.debug("History save error: %s", e)
+
 
 
 ws_manager = ConnectionManager()

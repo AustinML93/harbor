@@ -1,3 +1,6 @@
+import { ResponsiveContainer, AreaChart, Area } from "recharts";
+import type { StatHistoryRecord } from "../../hooks/useSystemStats";
+
 interface Props {
   label: string;
   value: string;
@@ -6,35 +9,49 @@ interface Props {
   accent?: { bg: string; fg: string };
   percent?: number;
   loading?: boolean;
+  history?: StatHistoryRecord[];
+  historyDataKey?: keyof StatHistoryRecord;
 }
 
-function ProgressBar({ percent }: { percent: number }) {
+function Sparkline({ data, dataKey, percent, defaultColor }: { data: StatHistoryRecord[], dataKey: keyof StatHistoryRecord, percent?: number, defaultColor: string }) {
+  if (!data || data.length === 0) {
+    return <div className="mt-4 h-12 w-full" />;
+  }
+
+  const p = percent ?? 0;
   const color =
-    percent > 90
+    p > 90
       ? "var(--color-danger)"
-      : percent > 70
+      : p > 70
       ? "var(--color-warning)"
-      : "var(--color-accent)";
+      : defaultColor;
 
   return (
-    <div
-      className="mt-4 h-1.5 w-full overflow-hidden rounded-full"
-      style={{ backgroundColor: "rgba(0, 0, 0, 0.1)" }}
-    >
-      <div
-        className="h-full rounded-full"
-        style={{
-          width: `${Math.min(percent, 100)}%`,
-          backgroundColor: color,
-          boxShadow: `0 0 10px ${color}`,
-          transition: "width 0.7s cubic-bezier(0.22, 1, 0.36, 1)",
-        }}
-      />
+    <div className="mt-4 h-12 w-full -mx-1">
+      <ResponsiveContainer width="100%" height="100%">
+        <AreaChart data={data}>
+          <defs>
+            <linearGradient id={`gradient-${dataKey}`} x1="0" y1="0" x2="0" y2="1">
+              <stop offset="5%" stopColor={color} stopOpacity={0.3} />
+              <stop offset="95%" stopColor={color} stopOpacity={0} />
+            </linearGradient>
+          </defs>
+          <Area
+            type="monotone"
+            dataKey={dataKey}
+            stroke={color}
+            strokeWidth={2}
+            fillOpacity={1}
+            fill={`url(#gradient-${dataKey})`}
+            isAnimationActive={false}
+          />
+        </AreaChart>
+      </ResponsiveContainer>
     </div>
   );
 }
 
-export function StatCard({ label, value, detail, icon, accent, percent, loading }: Props) {
+export function StatCard({ label, value, detail, icon, accent, percent, loading, history, historyDataKey }: Props) {
   if (loading) {
     return (
       <div className="harbor-card animate-pulse p-5">
@@ -44,7 +61,7 @@ export function StatCard({ label, value, detail, icon, accent, percent, loading 
         </div>
         <div className="mt-4 h-8 w-24 rounded" style={{ backgroundColor: "var(--color-border)" }} />
         <div className="mt-2 h-3 w-32 rounded" style={{ backgroundColor: "var(--color-border)" }} />
-        <div className="mt-4 h-1.5 w-full rounded-full" style={{ backgroundColor: "var(--color-border)" }} />
+        <div className="mt-4 h-12 w-full rounded" style={{ backgroundColor: "var(--color-border)" }} />
       </div>
     );
   }
@@ -74,7 +91,14 @@ export function StatCard({ label, value, detail, icon, accent, percent, loading 
           {detail}
         </p>
       )}
-      {percent !== undefined && <ProgressBar percent={percent} />}
+      {history && historyDataKey && (
+        <Sparkline 
+          data={history} 
+          dataKey={historyDataKey} 
+          percent={percent} 
+          defaultColor={accent?.fg ?? "var(--color-accent)"} 
+        />
+      )}
     </div>
   );
 }
