@@ -19,11 +19,7 @@ It's designed to be dead simple to deploy (`docker compose up -d`), opinionated 
 
 ## Screenshots
 
-![Harbor Dashboard](https://raw.githubusercontent.com/AustinML93/harbor/main/docs/dashboard.png)
-*Real-time system health and quick-launch services*
-
-![Container Management](https://raw.githubusercontent.com/AustinML93/harbor/main/docs/containers.png)
-*Manage Docker containers directly from the UI*
+> Screenshots coming soon — deploy the stack locally and see it for yourself in under 2 minutes.
 
 ---
 
@@ -37,7 +33,7 @@ It's designed to be dead simple to deploy (`docker compose up -d`), opinionated 
 ### 1. Clone the repo
 
 ```bash
-git clone https://github.com/yourusername/harbor.git
+git clone https://github.com/AustinML93/harbor.git
 cd harbor
 ```
 
