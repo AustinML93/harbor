@@ -1,5 +1,5 @@
 import { useState, useMemo } from "react";
-import { Cpu, HardDrive, MemoryStick, Network, Plus, Search, Anchor, Compass } from "lucide-react";
+import { Cpu, HardDrive, MemoryStick, Network, Plus, Search, Compass } from "lucide-react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 
 import { useSystemStats } from "../hooks/useSystemStats";
@@ -113,19 +113,6 @@ export default function Dashboard() {
       {/* Left Column: Main Content */}
       <div className="flex-1 min-w-0 space-y-6">
         
-        {/* Hero Section */}
-        <div className="flex items-center justify-between">
-          <h1 className="text-3xl font-bold tracking-tight" style={{ color: "var(--color-text)" }}>
-            Welcome to Harbor
-          </h1>
-          <div 
-            className="flex items-center justify-center w-12 h-12 rounded-2xl glass-panel"
-            style={{ color: "var(--color-accent)" }}
-          >
-            <Anchor size={24} />
-          </div>
-        </div>
-
         {/* Search & Actions */}
         <div className="flex gap-3">
           <div className="relative flex-1">

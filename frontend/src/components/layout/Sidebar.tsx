@@ -1,6 +1,7 @@
 import { NavLink, useNavigate } from "react-router-dom";
 import { Anchor, Container, LayoutDashboard, Settings, LogOut, Moon, Sun } from "lucide-react";
 import { useStore } from "../../store";
+import { useSystemStats } from "../../hooks/useSystemStats";
 import { clearToken } from "../../lib/auth";
 
 const NAV_ITEMS = [
@@ -12,6 +13,7 @@ const NAV_ITEMS = [
 export function Sidebar() {
   const wsConnected = useStore((s) => s.wsConnected);
   const { theme, toggleTheme } = useStore();
+  const { formatted } = useSystemStats();
   const navigate = useNavigate();
 
   function handleLogout() {
@@ -26,19 +28,18 @@ export function Sidebar() {
     >
       {/* Logo */}
       <div
-        className="flex items-center gap-2.5 px-4 py-4"
+        className="flex items-center gap-3 px-4 py-5"
         style={{ boxShadow: "inset 0 -1px 0 var(--color-border)" }}
       >
         <div
-          className="flex h-8 w-8 items-center justify-center rounded-lg"
+          className="flex h-10 w-10 items-center justify-center rounded-xl"
           style={{ backgroundColor: "var(--color-accent-dim)", color: "var(--color-accent)" }}
         >
-          <Anchor size={20} strokeWidth={1.75} />
+          <Anchor size={22} strokeWidth={1.75} />
         </div>
-        <span className="text-[15px] font-semibold tracking-tight" style={{ color: "var(--color-text)" }}>
+        <span className="text-lg font-bold tracking-tight" style={{ color: "var(--color-text)" }}>
           Harbor
         </span>
-        {/* WS connection dot */}
         <span
           className="ml-auto h-2 w-2 rounded-full"
           style={{ backgroundColor: wsConnected ? "var(--color-success)" : "var(--color-danger)" }}
@@ -87,6 +88,11 @@ export function Sidebar() {
         className="space-y-1 px-2 py-3"
         style={{ boxShadow: "inset 0 1px 0 var(--color-border)" }}
       >
+        {formatted?.uptime && (
+          <div className="px-3 pb-1 text-xs" style={{ color: "var(--color-muted)" }}>
+            Uptime {formatted.uptime}
+          </div>
+        )}
         <button
           onClick={toggleTheme}
           className="flex w-full items-center gap-2.5 rounded-md px-3 py-2 text-sm font-medium transition-colors"

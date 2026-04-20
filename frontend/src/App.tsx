@@ -8,7 +8,6 @@ import Dashboard from "./pages/Dashboard";
 import Containers from "./pages/Containers";
 import Settings from "./pages/Settings";
 import { Sidebar } from "./components/layout/Sidebar";
-import { TopBar } from "./components/layout/TopBar";
 import { ToastContainer } from "./components/ui/Toast";
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
@@ -24,10 +23,7 @@ function AppShell({ children }: { children: React.ReactNode }) {
   return (
     <div className="flex h-screen overflow-hidden" style={{ backgroundColor: "var(--color-bg)" }}>
       <Sidebar />
-      <div className="flex flex-1 flex-col overflow-hidden">
-        <TopBar />
-        <main className="flex-1 overflow-y-auto p-6">{children}</main>
-      </div>
+      <main className="flex-1 overflow-y-auto p-6 pt-8">{children}</main>
     </div>
   );
 }
