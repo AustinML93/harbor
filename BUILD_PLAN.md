@@ -72,7 +72,7 @@ List, inspect, and control Docker containers.
 - `[ ]` Frontend: `ActionMenu` with start/stop/restart buttons + confirmation for stop
 - `[ ]` Frontend: Log drawer — slide-out panel with scrollable container logs
 - `[ ]` Frontend: Optimistic UI for actions (state updates immediately, rolls back on error)
-- `[ ]` **Backlog:** Container remove/delete action — `DELETE /api/containers/{id}` endpoint + confirmation modal in UI. Currently only start/stop/restart are exposed; delete is a destructive action requiring explicit user confirmation before proceeding.
+- `[x]` **Container remove/delete** — `DELETE /api/containers/{id}` + confirmation modal (blocks removal if container is running).
 
 ### Acceptance Criteria
 - Container list shows all running and stopped containers
@@ -117,13 +117,10 @@ Configurable tiles for navigating to homelab services.
 - `[ ]` `GET /api/services` — parse and return validated service list
 - `[ ]` `PUT /api/services` — write updated list back to `services.yml`
 - `[ ]` `services.example.yml` provided in repo with common homelab services
-- `[ ]` Frontend: Services page with `ServiceGrid`
-- `[ ]` Frontend: `ServiceTile` — icon, name, description, external link
-- `[ ]` Frontend: Add/edit service modal
-- `[ ]` Frontend: Drag-to-reorder (nice-to-have, defer if complex)
-- `[ ]` Frontend: Category grouping / filter tabs
-- `[ ]` **Backlog:** Auto-discovery — scan running containers for known service images (Grafana, Portainer, etc.) and offer to add them as tiles
-- `[ ]` **Backlog:** `services.yml` permissions — currently requires manual `chmod 666` on the host file. Fix by adding a backend startup check that warns if `services.yml` is not writable, or by setting correct ownership in the Dockerfile entrypoint.
+- `[x]` Frontend: Services grid embedded in Dashboard (ServiceGrid, ServiceTile, add/edit/delete modal)
+- `[x]` Frontend: Auto-discovery modal — scan running containers by image name and offer to add as tiles
+- `[x]` Frontend: Icon picker with CDN-backed dashboard-icons library
+- `[ ]` **Backlog:** `services.yml` permissions — add a backend startup check that warns if `services.yml` is not writable.
 
 ### Acceptance Criteria
 - `services.yml` additions appear in UI on next page load
@@ -138,24 +135,26 @@ Configurable tiles for navigating to homelab services.
 Alert when containers go down.
 
 ### Tasks
-- `[ ]` `NotificationRule` model — per-container, enabled, threshold, webhook_url
-- `[ ]` `NotificationLog` model — sent alert history
-- `[ ]` `GET /api/notifications/rules` — list all rules
-- `[ ]` `POST /api/notifications/rules` — create rule
-- `[ ]` `PUT /api/notifications/rules/{id}` — update rule
-- `[ ]` `DELETE /api/notifications/rules/{id}` — delete rule
-- `[ ]` `Notifier` service — runs every 30s, checks containers against rules
-- `[ ]` Cooldown logic — don't re-alert within cooldown window (default 1h)
-- `[ ]` Webhook delivery — HTTP POST with JSON payload to configured URL
-- `[ ]` Frontend: Notification rules section in Settings
-- `[ ]` Frontend: Enable/disable toggle per container
-- `[ ]` Frontend: Webhook URL input + test button
+- `[x]` `NotificationRule` model — per-container, enabled, threshold, webhook_url
+- `[x]` `NotificationLog` model — sent alert history
+- `[x]` `GET /api/notifications/rules` — list all rules
+- `[x]` `POST /api/notifications/rules` — create rule
+- `[x]` `PUT /api/notifications/rules/{id}` — update rule
+- `[x]` `DELETE /api/notifications/rules/{id}` — delete rule
+- `[x]` `Notifier` service — runs every 30s, checks containers against rules
+- `[x]` Cooldown logic — don't re-alert within cooldown window (default 1h)
+- `[x]` Webhook delivery — HTTP POST with JSON payload to configured URL
+- `[x]` Frontend: Notification rules section in Settings
+- `[x]` Frontend: Enable/disable toggle per container
+- `[x]` Frontend: Webhook URL input + test button
+- `[x]` Frontend: Alert history in Settings (last 50 entries)
+- `[x]` `POST /api/notifications/test-webhook` — verify webhook URL is reachable
 
 ### Acceptance Criteria
 - Container down > threshold triggers webhook POST
 - Alert does not re-fire within cooldown period
 - Rule can be disabled without deletion
-- Alert history visible in UI (last 20 alerts)
+- Alert history visible in UI (last 50 alerts)
 
 ---
 
@@ -191,9 +190,10 @@ Alert when containers go down.
 
 ## Deferred / Future Phases
 
-These are intentionally out of scope for Phase 1 but worth noting:
+These are intentionally out of scope for the current build but worth noting:
 
-- **Docker Compose file management** — view/edit compose files in UI
+- **Portainer-style full container management** — compose file authoring, create/build containers from the UI, network and volume management, image browser and pruning. Large scope; treat as a future phase if Harbor grows toward a full Docker management tool.
+- **Docker Compose file management** — view/edit compose files in UI (subset of the above)
 - **Container resource graphs** — per-container CPU/RAM sparklines (requires Docker stats streaming)
 - **Multi-host** — connect to remote Docker hosts via TCP
 - **Notification channels beyond webhooks** — email, Slack, ntfy.sh, Gotify

@@ -7,10 +7,11 @@ interface Props {
   containers: ContainerSummary[];
   onAction: (id: string, action: ContainerAction) => void;
   onViewLogs: (id: string) => void;
+  onDelete: (container: ContainerSummary) => void;
   actionPending: boolean;
 }
 
-export function ContainerTable({ containers, onAction, onViewLogs, actionPending }: Props) {
+export function ContainerTable({ containers, onAction, onViewLogs, onDelete, actionPending }: Props) {
   if (containers.length === 0) {
     return (
       <div
@@ -115,6 +116,7 @@ export function ContainerTable({ containers, onAction, onViewLogs, actionPending
                   <ActionMenu
                     container={c}
                     onAction={(action) => onAction(c.id, action)}
+                    onDelete={() => onDelete(c)}
                     disabled={actionPending}
                   />
                 </div>

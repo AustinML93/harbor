@@ -1,20 +1,26 @@
 import { useState } from "react";
-import { Play, Square, RotateCcw, MoreHorizontal } from "lucide-react";
+import { Play, Square, RotateCcw, Trash2, MoreHorizontal } from "lucide-react";
 import type { ContainerAction, ContainerSummary } from "../../types";
 
 interface Props {
   container: ContainerSummary;
   onAction: (action: ContainerAction) => void;
+  onDelete: () => void;
   disabled?: boolean;
 }
 
-export function ActionMenu({ container, onAction, disabled }: Props) {
+export function ActionMenu({ container, onAction, onDelete, disabled }: Props) {
   const [open, setOpen] = useState(false);
   const isRunning = container.state === "running";
 
   function handle(action: ContainerAction) {
     onAction(action);
     setOpen(false);
+  }
+
+  function handleDelete() {
+    setOpen(false);
+    onDelete();
   }
 
   return (
@@ -54,6 +60,13 @@ export function ActionMenu({ container, onAction, disabled }: Props) {
               icon={<RotateCcw size={13} />}
               label="Restart"
               onClick={() => handle("restart")}
+            />
+            <div className="my-1 border-t" style={{ borderColor: "var(--color-border)" }} />
+            <MenuItem
+              icon={<Trash2 size={13} />}
+              label="Remove"
+              onClick={handleDelete}
+              danger
             />
           </div>
         </>

@@ -1,14 +1,18 @@
 import { useState } from "react";
-import { useContainers, useContainerAction } from "../hooks/useContainers";
+import { useContainers, useContainerAction, useContainerDelete } from "../hooks/useContainers";
 import { ContainerTable } from "../components/containers/ContainerTable";
 import { Modal } from "../components/ui/Modal";
+import type { ContainerSummary } from "../types";
 
 export default function Containers() {
   const containers = useContainers();
   const { mutate: runAction, isPending } = useContainerAction();
+  const { mutate: deleteContainer, isPending: isDeleting } = useContainerDelete();
+
   const [logContainerId, setLogContainerId] = useState<string | null>(null);
   const [logs, setLogs] = useState<string[]>([]);
   const [logsLoading, setLogsLoading] = useState(false);
+  const [deleteTarget, setDeleteTarget] = useState<ContainerSummary | null>(null);
 
   async function openLogs(containerId: string) {
     setLogContainerId(containerId);
@@ -23,6 +27,11 @@ export default function Containers() {
     } finally {
       setLogsLoading(false);
     }
+  }
+
+  function confirmDelete() {
+    if (!deleteTarget) return;
+    deleteContainer(deleteTarget.id, { onSettled: () => setDeleteTarget(null) });
   }
 
   const logContainer = containers.find((c) => c.id === logContainerId);
@@ -43,10 +52,11 @@ export default function Containers() {
         containers={containers}
         onAction={(id, action) => runAction({ id, action })}
         onViewLogs={openLogs}
+        onDelete={setDeleteTarget}
         actionPending={isPending}
       />
 
-      {/* Log drawer modal */}
+      {/* Log drawer */}
       <Modal
         isOpen={logContainerId !== null}
         onClose={() => setLogContainerId(null)}
@@ -68,6 +78,38 @@ export default function Containers() {
               </div>
             ))
           )}
+        </div>
+      </Modal>
+
+      {/* Delete confirmation */}
+      <Modal
+        isOpen={deleteTarget !== null}
+        onClose={() => setDeleteTarget(null)}
+        title="Remove container"
+      >
+        <div className="space-y-4">
+          <p className="text-sm" style={{ color: "var(--color-text)" }}>
+            Remove{" "}
+            <span className="font-semibold">{deleteTarget?.name}</span>? This cannot be undone.
+            {deleteTarget?.state === "running" && (
+              <span className="mt-2 block" style={{ color: "var(--color-danger)" }}>
+                Stop the container before removing it.
+              </span>
+            )}
+          </p>
+          <div className="flex justify-end gap-2">
+            <button className="harbor-btn-ghost" onClick={() => setDeleteTarget(null)}>
+              Cancel
+            </button>
+            <button
+              className="harbor-btn-primary"
+              style={{ backgroundColor: "var(--color-danger)", borderColor: "var(--color-danger)" }}
+              onClick={confirmDelete}
+              disabled={isDeleting || deleteTarget?.state === "running"}
+            >
+              {isDeleting ? "Removing…" : "Remove"}
+            </button>
+          </div>
         </div>
       </Modal>
     </div>

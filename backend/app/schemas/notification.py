@@ -29,6 +29,10 @@ class NotificationRuleItem(BaseModel):
     model_config = {"from_attributes": True}
 
 
+class TestWebhookRequest(BaseModel):
+    url: str
+
+
 class NotificationLogItem(BaseModel):
     id: int
     rule_id: Optional[int]

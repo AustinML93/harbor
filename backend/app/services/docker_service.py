@@ -269,6 +269,17 @@ class DockerService:
             _reset_client()
             raise HTTPException(status_code=503, detail=str(e))
 
+    def remove(self, container_id: str) -> None:
+        try:
+            _get_client().containers.get(container_id).remove(force=False)
+        except NotFound:
+            raise HTTPException(status_code=404, detail="Container not found")
+        except docker.errors.APIError as e:
+            raise HTTPException(status_code=409, detail=str(e))
+        except DockerException as e:
+            _reset_client()
+            raise HTTPException(status_code=503, detail=str(e))
+
     def get_states(self) -> dict[str, str]:
         """Lightweight clean-state poll for the notifier. Returns {id: clean_state}."""
         try:

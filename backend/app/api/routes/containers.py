@@ -40,6 +40,12 @@ async def restart_container(container_id: str, _: str = Depends(get_current_user
     return {"status": "restarted"}
 
 
+@router.delete("/{container_id}", status_code=204)
+async def delete_container(container_id: str, _: str = Depends(get_current_user)):
+    """Remove a container. Container must be stopped first."""
+    docker_service.remove(container_id)
+
+
 @router.get("/{container_id}/logs")
 async def get_logs(
     container_id: str,

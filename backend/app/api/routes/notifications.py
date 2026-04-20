@@ -1,3 +1,4 @@
+import httpx
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 
@@ -9,6 +10,7 @@ from app.schemas.notification import (
     NotificationRuleCreate,
     NotificationRuleItem,
     NotificationRuleUpdate,
+    TestWebhookRequest,
 )
 
 router = APIRouter()
@@ -70,3 +72,18 @@ async def get_log(db: Session = Depends(get_db), _: str = Depends(get_current_us
         .limit(50)
         .all()
     )
+
+
+@router.post("/test-webhook")
+async def test_webhook(body: TestWebhookRequest, _: str = Depends(get_current_user)):
+    """Send a test POST to a webhook URL to verify it is reachable."""
+    try:
+        async with httpx.AsyncClient() as client:
+            resp = await client.post(
+                body.url,
+                json={"text": "Test notification from Harbor", "container": "harbor-test"},
+                timeout=10,
+            )
+        return {"status": resp.status_code, "ok": resp.is_success}
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=f"Webhook unreachable: {e}")
