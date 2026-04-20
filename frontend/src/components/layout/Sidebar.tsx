@@ -37,7 +37,7 @@ export function Sidebar() {
         >
           <Anchor size={22} strokeWidth={1.75} />
         </div>
-        <span className="text-lg font-bold tracking-tight" style={{ color: "var(--color-text)" }}>
+        <span className="text-2xl font-bold tracking-tight" style={{ color: "var(--color-text)" }}>
           Harbor
         </span>
         <span
