@@ -6,7 +6,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from app.core.config import settings
 from app.core.database import init_db
-from app.api.routes import auth, containers, notifications, services, system
+from app.api.routes import auth, containers, notifications, operations, services, system
 from app.ws.manager import ws_manager
 
 
@@ -48,6 +48,7 @@ app.include_router(containers.router, prefix="/api/containers", tags=["container
 app.include_router(system.router, prefix="/api/system", tags=["system"])
 app.include_router(services.router, prefix="/api/services", tags=["services"])
 app.include_router(notifications.router, prefix="/api/notifications", tags=["notifications"])
+app.include_router(operations.router, prefix="/api/operations", tags=["operations"])
 
 # WebSocket endpoint lives on the manager
 app.include_router(ws_manager.router, tags=["websocket"])

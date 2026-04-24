@@ -92,6 +92,29 @@ class NotifierTests(unittest.TestCase):
 
         self.assertEqual(self._log_count(), 1)
 
+    def test_notifier_sends_recovery_after_down_alert(self) -> None:
+        self._seed_rule_and_event(threshold_minutes=5, down_minutes_ago=10)
+
+        with patch("app.services.notifier.SessionLocal", new=self.session_factory):
+            with patch("app.services.notifier.docker_service.get_states", return_value={"container-123": "exited"}):
+                notifier.check_and_fire()
+            with patch("app.services.notifier.docker_service.get_states", return_value={"container-123": "running"}):
+                notifier.check_and_fire()
+
+        messages = self._messages()
+        self.assertEqual(len(messages), 2)
+        self.assertIn("Container 'Harbor Test' is exited.", messages[0])
+        self.assertEqual(messages[1], "Container 'Harbor Test' recovered and is running again.")
+
+    def test_notifier_does_not_send_recovery_without_prior_alert(self) -> None:
+        self._seed_rule_and_event(threshold_minutes=5, down_minutes_ago=1)
+
+        with patch("app.services.notifier.SessionLocal", new=self.session_factory):
+            with patch("app.services.notifier.docker_service.get_states", return_value={"container-123": "running"}):
+                notifier.check_and_fire()
+
+        self.assertEqual(self._log_count(), 0)
+
     def test_notifier_skips_cycle_when_docker_poll_fails(self) -> None:
         self._seed_rule_and_event(threshold_minutes=5, down_minutes_ago=10)
 

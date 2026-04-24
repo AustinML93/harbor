@@ -231,28 +231,17 @@ If you find a bug, please [open an issue](../../issues) with your Docker version
 
 ---
 
-## Known compatibility issues
+## Python Version
 
-### Python 3.14 + SQLAlchemy — `X | None` union syntax
+Harbor's backend is developed, tested, and shipped on **Python 3.11**. The Docker image and GitHub Actions workflow both use Python 3.11, and the repo includes a `.python-version` file for version managers such as pyenv.
 
-If you're developing with Python 3.14, SQLAlchemy will raise a `TypeError` on startup when processing `Mapped[X | None]` annotations in model files:
+Avoid creating the backend virtualenv with newer Homebrew/system Python versions unless you are intentionally doing compatibility work. Python 3.14 currently exposes SQLAlchemy typing issues with the pinned backend dependency set, including errors like:
 
 ```
 TypeError: descriptor '__getitem__' requires a 'typing.Union' object but received a 'tuple'
 ```
 
-Python 3.14 changed how PEP 604 unions (`str | None`) are represented internally — they become `types.UnionType` instead of `typing.Union`, which SQLAlchemy's type introspection rejects. All models in this project use `Optional[X]` from `typing` to avoid this. If you add new model columns, do the same:
-
-```python
-# Bad — breaks on Python 3.14
-webhook_url: Mapped[str | None] = mapped_column(String, nullable=True)
-
-# Good
-from typing import Optional
-webhook_url: Mapped[Optional[str]] = mapped_column(String, nullable=True)
-```
-
-The Docker image uses Python 3.11 and is unaffected.
+If Python 3.14 support becomes important, treat it as a deliberate dependency-upgrade task and add CI coverage for that version.
 
 ---
 

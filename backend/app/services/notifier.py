@@ -19,6 +19,17 @@ COOLDOWN_MINUTES = 60
 
 
 class Notifier:
+    def _should_send_recovery(self, rule: NotificationRule, db) -> bool:
+        latest_log = (
+            db.query(NotificationLog)
+            .filter(NotificationLog.rule_id == rule.id)
+            .order_by(NotificationLog.sent_at.desc())
+            .first()
+        )
+        if latest_log is None:
+            return False
+        return "recovered" not in latest_log.message.lower()
+
     def _down_since(self, container_id: str, db) -> Optional[datetime]:
         latest_event = (
             db.query(UptimeEvent)
@@ -53,6 +64,10 @@ class Notifier:
             for rule in rules:
                 state = states.get(rule.container_id, "missing")
                 if state in ("running", "restarting"):
+                    if self._should_send_recovery(rule, db):
+                        message = f"Container '{rule.container_name}' recovered and is running again."
+                        self._send(rule, message, db, update_cooldown=False)
+                        _cooldown.pop(rule.id, None)
                     continue
 
                 down_since = self._down_since(rule.container_id, db)
@@ -78,7 +93,7 @@ class Notifier:
         finally:
             db.close()
 
-    def _send(self, rule: NotificationRule, message: str, db) -> None:
+    def _send(self, rule: NotificationRule, message: str, db, update_cooldown: bool = True) -> None:
         logger.warning("ALERT: %s", message)
 
         if rule.webhook_url:
@@ -98,7 +113,8 @@ class Notifier:
         )
         db.add(log_entry)
         db.commit()
-        _cooldown[rule.id] = datetime.now(timezone.utc)
+        if update_cooldown:
+            _cooldown[rule.id] = datetime.now(timezone.utc)
 
 
 notifier = Notifier()

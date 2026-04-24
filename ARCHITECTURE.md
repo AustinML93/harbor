@@ -72,7 +72,7 @@ All real-time data (stats, container states) flows through a single WebSocket co
 
 ### Backend
 
-**Framework:** FastAPI (Python 3.11+)
+**Framework:** FastAPI (Python 3.11)
 **Auth:** Single shared password (bcrypt hashed, initially sourced from env, then overrideable from the UI and stored in SQLite). Login returns a HS256 JWT. All REST routes and the WS handshake require a valid JWT.
 **Database:** SQLite via SQLAlchemy (sync). Four tables: `uptime_events`, `notification_rules`, `notification_log`, `settings`.
 **Docker:** Official `docker` Python SDK. Socket path is configurable.

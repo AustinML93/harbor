@@ -83,6 +83,17 @@ export interface NotificationLogItem {
   sent_at: string;
 }
 
+export interface OperationEvent {
+  id: string;
+  kind: "container" | "notification";
+  severity: "success" | "warning" | "danger" | "info";
+  title: string;
+  message: string;
+  container_id: string | null;
+  container_name: string;
+  timestamp: string;
+}
+
 // WebSocket message union type
 export type WsMessage =
   | { type: "stats"; data: SystemStats }

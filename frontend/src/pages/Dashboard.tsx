@@ -1,5 +1,5 @@
 import { useState, useMemo } from "react";
-import { Cpu, HardDrive, MemoryStick, Network, Plus, Search, Compass } from "lucide-react";
+import { Activity, Bell, CheckCircle2, Cpu, HardDrive, MemoryStick, Network, Plus, Search, Compass } from "lucide-react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 
 import { useSystemStats } from "../hooks/useSystemStats";
@@ -13,6 +13,105 @@ import { ServiceGrid } from "../components/services/ServiceGrid";
 import { ServiceForm } from "../components/services/ServiceForm";
 import { DiscoveryModal } from "../components/services/DiscoveryModal";
 import { Modal } from "../components/ui/Modal";
+import type { OperationEvent } from "../types";
+
+function formatEventTime(value: string) {
+  const date = new Date(value);
+  const now = Date.now();
+  const diffSeconds = Math.max(0, Math.floor((now - date.getTime()) / 1000));
+
+  if (diffSeconds < 60) return "Just now";
+  if (diffSeconds < 3600) return `${Math.floor(diffSeconds / 60)}m ago`;
+  if (diffSeconds < 86400) return `${Math.floor(diffSeconds / 3600)}h ago`;
+  return date.toLocaleDateString(undefined, { month: "short", day: "numeric" });
+}
+
+function severityColor(severity: OperationEvent["severity"]) {
+  switch (severity) {
+    case "success":
+      return "var(--color-success)";
+    case "warning":
+      return "var(--color-warning)";
+    case "danger":
+      return "var(--color-danger)";
+    default:
+      return "var(--color-accent)";
+  }
+}
+
+function severityBackground(severity: OperationEvent["severity"]) {
+  switch (severity) {
+    case "success":
+      return "var(--color-success-dim)";
+    case "warning":
+      return "var(--color-warning-dim)";
+    case "danger":
+      return "var(--color-danger-dim)";
+    default:
+      return "var(--color-accent-dim)";
+  }
+}
+
+function OperationsTimeline() {
+  const { data: events = [], isLoading } = useQuery<OperationEvent[]>({
+    queryKey: ["operations-timeline"],
+    queryFn: () => api.get("/operations/timeline?limit=8").then((r) => r.data),
+    refetchInterval: 30000,
+  });
+
+  return (
+    <div className="harbor-card p-5 space-y-4">
+      <div className="flex items-center justify-between">
+        <h3 className="text-xs font-semibold uppercase tracking-wider" style={{ color: "var(--color-muted)" }}>Recent Activity</h3>
+        <Activity size={16} style={{ color: "var(--color-muted)" }} />
+      </div>
+
+      {isLoading ? (
+        <div className="space-y-3">
+          {[0, 1, 2].map((item) => (
+            <div key={item} className="h-12 rounded-lg animate-pulse" style={{ backgroundColor: "var(--color-border)" }} />
+          ))}
+        </div>
+      ) : events.length === 0 ? (
+        <div className="py-6 text-sm text-center" style={{ color: "var(--color-muted)" }}>
+          No activity recorded yet.
+        </div>
+      ) : (
+        <div className="space-y-1">
+          {events.map((event) => {
+            const color = severityColor(event.severity);
+            const backgroundColor = severityBackground(event.severity);
+            const Icon = event.kind === "notification" ? Bell : event.severity === "success" ? CheckCircle2 : Activity;
+
+            return (
+              <div key={event.id} className="flex gap-3 rounded-lg px-2 py-3">
+                <div
+                  className="mt-0.5 flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-full"
+                  style={{ backgroundColor, color }}
+                >
+                  <Icon size={14} />
+                </div>
+                <div className="min-w-0 flex-1">
+                  <div className="flex items-center justify-between gap-2">
+                    <p className="truncate text-sm font-medium" style={{ color: "var(--color-text)" }}>
+                      {event.title}
+                    </p>
+                    <span className="flex-shrink-0 text-xs" style={{ color: "var(--color-muted)" }}>
+                      {formatEventTime(event.timestamp)}
+                    </span>
+                  </div>
+                  <p className="mt-0.5 line-clamp-2 text-xs leading-5" style={{ color: "var(--color-muted)" }}>
+                    {event.message}
+                  </p>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      )}
+    </div>
+  );
+}
 
 function DockerSummary() {
   const containers = useContainers();
@@ -211,6 +310,8 @@ export default function Dashboard() {
         </div>
 
         <DockerSummary />
+
+        <OperationsTimeline />
       </div>
 
       {/* Modals */}

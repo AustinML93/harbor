@@ -15,7 +15,7 @@ Thanks for your interest in contributing. Harbor is a community tool — built f
 ## Development Setup
 
 ### Prerequisites
-- Python 3.11+
+- Python 3.11
 - Node.js 20+
 - Docker + Docker Compose
 - A running Docker daemon (for container management features)
@@ -24,7 +24,7 @@ Thanks for your interest in contributing. Harbor is a community tool — built f
 
 ```bash
 cd backend
-python -m venv .venv
+python3.11 -m venv .venv
 source .venv/bin/activate   # Windows: .venv\Scripts\activate
 pip install -r requirements.txt
 
