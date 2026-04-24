@@ -12,17 +12,17 @@
 Backend skeleton and authentication working end-to-end.
 
 ### Tasks
-- `[ ]` FastAPI app scaffold (`main.py`, lifespan, CORS, exception handlers)
-- `[ ]` pydantic-settings config (`SECRET_KEY`, `PASSWORD_HASH`, `DOCKER_SOCKET`, etc.)
-- `[ ]` SQLAlchemy engine setup + `init_db()` on startup
-- `[ ]` bcrypt password hashing + JWT create/verify helpers
-- `[ ]` `POST /api/auth/login` — verify password, return JWT
-- `[ ]` JWT Bearer dependency (`deps.py`) applied to all protected routes
-- `[ ]` `GET /health` — unauthenticated health check
-- `[ ]` Frontend: Login page with password form
-- `[ ]` Frontend: JWT stored in localStorage, Axios interceptor adds `Authorization` header
-- `[ ]` Frontend: Protected route wrapper — redirect to `/login` if no token
-- `[ ]` Frontend: Logout clears token, redirects to login
+- `[x]` FastAPI app scaffold (`main.py`, lifespan, CORS, exception handlers)
+- `[x]` pydantic-settings config (`SECRET_KEY`, `PASSWORD_HASH`, `DOCKER_SOCKET`, etc.)
+- `[x]` SQLAlchemy engine setup + `init_db()` on startup
+- `[x]` bcrypt password hashing + JWT create/verify helpers
+- `[x]` `POST /api/auth/login` — verify password, return JWT
+- `[x]` JWT Bearer dependency (`deps.py`) applied to all protected routes
+- `[x]` `GET /health` — unauthenticated health check
+- `[x]` Frontend: Login page with password form
+- `[x]` Frontend: JWT stored in localStorage, Axios interceptor adds `Authorization` header
+- `[x]` Frontend: Protected route wrapper — redirect to `/login` if no token
+- `[x]` Frontend: Logout clears token, redirects to login
 
 ### Acceptance Criteria
 - Can POST to `/api/auth/login` with correct password and receive a JWT
@@ -37,12 +37,12 @@ Backend skeleton and authentication working end-to-end.
 Real system data flowing to the frontend.
 
 ### Tasks
-- `[ ]` `SystemService` — psutil wrappers for CPU %, RAM %, disk usage, network I/O
-- `[ ]` `GET /api/system/stats` — returns current snapshot
-- `[ ]` `GET /api/system/disks` — returns all mounted disks
-- `[ ]` Frontend: Dashboard page skeleton with layout
-- `[ ]` Frontend: `StatCard` component — icon, label, value, sparkline placeholder
-- `[ ]` Frontend: Four stat cards wired to `GET /api/system/stats`
+- `[x]` `SystemService` — psutil wrappers for CPU %, RAM %, disk usage, network I/O
+- `[x]` `GET /api/system/stats` — returns current snapshot
+- `[x]` `GET /api/system/disks` — returns all mounted disks
+- `[x]` Frontend: Dashboard page skeleton with layout
+- `[x]` Frontend: `StatCard` component — icon, label, value, sparkline placeholder
+- `[x]` Frontend: Four stat cards wired to `GET /api/system/stats`
 - `[ ]` Frontend: Auto-refresh every 5s via TanStack Query `refetchInterval`
 - `[x]` **Dashboard Icons integration** — homarr-labs/dashboard-icons PNGs via jsDelivr CDN. Auto-match by service name, favicon fallback, letter avatar fallback. Searchable IconPicker in add/edit form.
 
@@ -58,20 +58,20 @@ Real system data flowing to the frontend.
 List, inspect, and control Docker containers.
 
 ### Tasks
-- `[ ]` `DockerService` — Docker SDK wrapper for list/inspect/start/stop/restart/logs
-- `[ ]` `GET /api/containers` — all containers with id, name, image, state, uptime, ports
-- `[ ]` `GET /api/containers/{id}` — single container detail
-- `[ ]` `POST /api/containers/{id}/start` — start container
-- `[ ]` `POST /api/containers/{id}/stop` — stop container
-- `[ ]` `POST /api/containers/{id}/restart` — restart container
-- `[ ]` `GET /api/containers/{id}/logs` — last N lines (query param `lines=100`)
-- `[ ]` `UptimeEvent` model — record state transitions to SQLite
+- `[x]` `DockerService` — Docker SDK wrapper for list/inspect/start/stop/restart/logs
+- `[x]` `GET /api/containers` — all containers with id, name, image, state, uptime, ports
+- `[x]` `GET /api/containers/{id}` — single container detail
+- `[x]` `POST /api/containers/{id}/start` — start container
+- `[x]` `POST /api/containers/{id}/stop` — stop container
+- `[x]` `POST /api/containers/{id}/restart` — restart container
+- `[x]` `GET /api/containers/{id}/logs` — last N lines (query param `lines=100`)
+- `[x]` `UptimeEvent` model — record state transitions to SQLite
 - `[ ]` Uptime calculation — from events, compute % uptime over last 24h / 7d
-- `[ ]` Frontend: Containers page with `ContainerTable`
-- `[ ]` Frontend: Status `Badge` component (running/stopped/restarting/paused)
-- `[ ]` Frontend: `ActionMenu` with start/stop/restart buttons + confirmation for stop
-- `[ ]` Frontend: Log drawer — slide-out panel with scrollable container logs
-- `[ ]` Frontend: Optimistic UI for actions (state updates immediately, rolls back on error)
+- `[x]` Frontend: Containers page with `ContainerTable`
+- `[x]` Frontend: Status `Badge` component (running/stopped/restarting/paused)
+- `[x]` Frontend: `ActionMenu` with start/stop/restart buttons + confirmation for stop
+- `[x]` Frontend: Log drawer — slide-out panel with scrollable container logs
+- `[x]` Frontend: Optimistic UI for actions (state updates immediately, rolls back on error)
 - `[x]` **Container remove/delete** — `DELETE /api/containers/{id}` + confirmation modal (blocks removal if container is running).
 
 ### Acceptance Criteria
@@ -87,18 +87,18 @@ List, inspect, and control Docker containers.
 Push live data to all connected browser tabs.
 
 ### Tasks
-- `[ ]` `ConnectionManager` — track active WS connections, broadcast, handle disconnects
-- `[ ]` `GET /ws` — WS endpoint, authenticates via `?token=` query param
-- `[ ]` Background task: 1s loop collects system stats, broadcasts `{ type: "stats", data: {...} }`
-- `[ ]` Background task: 5s loop polls container states, broadcasts `{ type: "containers", data: [...] }`
+- `[x]` `ConnectionManager` — track active WS connections, broadcast, handle disconnects
+- `[x]` `GET /ws` — WS endpoint, authenticates via `?token=` query param
+- `[x]` Background task: 1s loop collects system stats, broadcasts `{ type: "stats", data: {...} }`
+- `[x]` Background task: 5s loop polls container states, broadcasts `{ type: "containers", data: [...] }`
 - `[ ]` Broadcast only diffs for containers to reduce payload size
-- `[ ]` Heartbeat / ping-pong to detect dead connections
-- `[ ]` Frontend: `useWebSocket` hook — connect on mount, reconnect with exponential backoff
-- `[ ]` Frontend: WS messages dispatched to Zustand store
-- `[ ]` Frontend: `useSystemStats` hook reads from store (no polling — WS only)
-- `[ ]` Frontend: Dashboard stat cards fed from WS store
-- `[ ]` Frontend: Container status badges update live from WS
-- `[ ]` Frontend: Connection status indicator in TopBar
+- `[x]` Heartbeat / ping-pong to detect dead connections
+- `[x]` Frontend: `useWebSocket` hook — connect on mount, reconnect with exponential backoff
+- `[x]` Frontend: WS messages dispatched to Zustand store
+- `[x]` Frontend: `useSystemStats` hook reads from store (no polling — WS only)
+- `[x]` Frontend: Dashboard stat cards fed from WS store
+- `[x]` Frontend: Container status badges update live from WS
+- `[x]` Frontend: Connection status indicator in TopBar
 
 ### Acceptance Criteria
 - Browser receives system stats ~1s after they change
@@ -113,10 +113,10 @@ Push live data to all connected browser tabs.
 Configurable tiles for navigating to homelab services.
 
 ### Tasks
-- `[ ]` `services.yml` schema + Pydantic validation (name, url, icon, description, category)
-- `[ ]` `GET /api/services` — parse and return validated service list
-- `[ ]` `PUT /api/services` — write updated list back to `services.yml`
-- `[ ]` `services.example.yml` provided in repo with common homelab services
+- `[x]` `services.yml` schema + Pydantic validation (name, url, icon, description, category)
+- `[x]` `GET /api/services` — parse and return validated service list
+- `[x]` `PUT /api/services` — write updated list back to `services.yml`
+- `[x]` `services.example.yml` provided in repo with common homelab services
 - `[x]` Frontend: Services grid embedded in Dashboard (ServiceGrid, ServiceTile, add/edit/delete modal)
 - `[x]` Frontend: Auto-discovery modal — scan running containers by image name and offer to add as tiles
 - `[x]` Frontend: Icon picker with CDN-backed dashboard-icons library
@@ -162,16 +162,16 @@ Alert when containers go down.
 
 ### UI/UX
 - `[ ]` Skeleton loaders for all data-loading states
-- `[ ]` Empty states with helpful messages (no containers, no services)
-- `[ ]` Toast notifications for action results (container started, error, etc.)
+- `[x]` Empty states with helpful messages (no containers, no services)
+- `[x]` Toast notifications for action results (container started, error, etc.)
 - `[ ]` Error boundaries with friendly fallback UI
-- `[ ]` Mobile responsive layout (sidebar collapses to bottom nav on mobile)
+- `[x]` Mobile responsive layout (sidebar collapses to bottom nav on mobile)
 - `[ ]` Keyboard navigation for container action menus
 
 ### Theme
-- `[ ]` Dark theme (default) fully implemented
-- `[ ]` Light theme fully implemented
-- `[ ]` Theme preference persisted in localStorage
+- `[x]` Dark theme (default) fully implemented
+- `[x]` Light theme fully implemented
+- `[x]` Theme preference persisted in localStorage
 - `[ ]` Smooth theme transition (CSS transition on bg/text)
 
 ### Performance
@@ -180,10 +180,10 @@ Alert when containers go down.
 - `[ ]` Lazy load pages with React.lazy + Suspense
 
 ### Deploy
-- `[ ]` Frontend multi-stage Dockerfile (build → nginx)
+- `[x]` Frontend multi-stage Dockerfile (build → nginx)
 - `[ ]` Backend Dockerfile with non-root user
-- `[ ]` `docker-compose.yml` health checks on both services
-- `[ ]` `docker-compose.yml` restart policies
+- `[x]` `docker-compose.yml` health checks on both services
+- `[x]` `docker-compose.yml` restart policies
 - `[ ]` README with quickstart, env var documentation, screenshot
 
 ---

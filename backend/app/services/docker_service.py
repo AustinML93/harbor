@@ -280,8 +280,8 @@ class DockerService:
             _reset_client()
             raise HTTPException(status_code=503, detail=str(e))
 
-    def get_states(self) -> dict[str, str]:
-        """Lightweight clean-state poll for the notifier. Returns {id: clean_state}."""
+    def get_states(self) -> Optional[dict[str, str]]:
+        """Lightweight clean-state poll for the notifier. Returns None on Docker failure."""
         try:
             client = _get_client()
             return {
@@ -290,9 +290,9 @@ class DockerService:
             }
         except DockerException:
             _reset_client()
-            return {}
+            return None
 
-    def discover_services(self) -> list[dict]:
+    def discover_services(self, host: str, scheme: str = "http") -> list[dict]:
         """Return running containers that expose host ports, formatted as service candidates."""
         try:
             client = _get_client()
@@ -316,7 +316,7 @@ class DockerService:
                 slug = name.lower().replace(" ", "-")
                 discovered.append({
                     "name": name.capitalize(),
-                    "url": f"http://localhost:{public_port}",
+                    "url": f"{scheme}://{host}:{public_port}",
                     "icon": slug,
                     "description": "Auto-discovered service",
                     "category": "Discovered",

@@ -73,8 +73,8 @@ All real-time data (stats, container states) flows through a single WebSocket co
 ### Backend
 
 **Framework:** FastAPI (Python 3.11+)
-**Auth:** Single shared password (bcrypt hashed, stored in env). Login returns a HS256 JWT. All REST routes and the WS handshake require a valid JWT.
-**Database:** SQLite via SQLAlchemy (sync). Three tables: `uptime_events`, `notification_rules`, `notification_log`.
+**Auth:** Single shared password (bcrypt hashed, initially sourced from env, then overrideable from the UI and stored in SQLite). Login returns a HS256 JWT. All REST routes and the WS handshake require a valid JWT.
+**Database:** SQLite via SQLAlchemy (sync). Four tables: `uptime_events`, `notification_rules`, `notification_log`, `settings`.
 **Docker:** Official `docker` Python SDK. Socket path is configurable.
 **System stats:** `psutil` for CPU, RAM, disk, network.
 **Real-time:** FastAPI native WebSockets. A single `ConnectionManager` maintains all active connections and fan-outs broadcast messages.
@@ -182,7 +182,7 @@ docker compose up -d
 ### Ports
 | Port | Service |
 |------|---------|
-| `3000` | Harbor UI (nginx, proxies to backend) |
+| `3113` | Harbor UI (nginx, proxies to backend) |
 
 ---
 
@@ -217,6 +217,8 @@ harbor/
 │   │   │   └── security.py          # bcrypt + JWT helpers
 │   │   ├── models/
 │   │   │   ├── notification.py      # NotificationRule, NotificationLog ORM
+│   │   │   ├── setting.py           # Persistent app settings (password hash, etc.)
+│   │   │   ├── system_stat.py       # Historical CPU/RAM/disk snapshots
 │   │   │   └── uptime.py            # UptimeEvent ORM
 │   │   ├── schemas/
 │   │   │   ├── auth.py
@@ -253,7 +255,7 @@ harbor/
 │   │   │   ├── Containers.tsx
 │   │   │   ├── Dashboard.tsx
 │   │   │   ├── Login.tsx
-│   │   │   └── Services.tsx
+│   │   │   └── Settings.tsx
 │   │   ├── store/
 │   │   │   └── index.ts             # Zustand: auth + live stats + containers
 │   │   ├── types/

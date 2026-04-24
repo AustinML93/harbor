@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Request
 
 from app.api.deps import get_current_user
 from app.schemas.service import ServiceConfig, ServiceItem
@@ -24,7 +24,10 @@ async def update_services(body: ServiceConfig, _: str = Depends(get_current_user
 
 
 @router.get("/discover", response_model=list[ServiceItem])
-async def discover_services(_: str = Depends(get_current_user)):
+async def discover_services(request: Request, _: str = Depends(get_current_user)):
     """Auto-discover potential services from running Docker containers."""
     from app.services.docker_service import docker_service
-    return [ServiceItem(**item) for item in docker_service.discover_services()]
+
+    host = request.url.hostname or "localhost"
+    scheme = request.url.scheme or "http"
+    return [ServiceItem(**item) for item in docker_service.discover_services(host=host, scheme=scheme)]
