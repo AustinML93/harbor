@@ -17,3 +17,5 @@ This document tracks upcoming features and architectural improvements for Harbor
 - Alerting & Webhooks (Apprise integration)
 - OMV OS Integration (check for `apt` updates)
 - Persistent Volume Backup Manager
+- Expand backend automated test coverage
+  Focus next on auth flows, services.yml persistence/validation, and a few more notifier positive-path/error-path cases.
