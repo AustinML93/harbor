@@ -59,6 +59,10 @@ class NotifierTests(unittest.TestCase):
         with self.session_factory() as db:
             return db.query(NotificationLog).count()
 
+    def _messages(self) -> list[str]:
+        with self.session_factory() as db:
+            return [entry.message for entry in db.query(NotificationLog).order_by(NotificationLog.id.asc()).all()]
+
     def test_notifier_respects_down_threshold(self) -> None:
         self._seed_rule_and_event(threshold_minutes=5, down_minutes_ago=1)
 
@@ -67,6 +71,26 @@ class NotifierTests(unittest.TestCase):
                 notifier.check_and_fire()
 
         self.assertEqual(self._log_count(), 0)
+
+    def test_notifier_creates_alert_after_threshold(self) -> None:
+        self._seed_rule_and_event(threshold_minutes=5, down_minutes_ago=10)
+
+        with patch("app.services.notifier.SessionLocal", new=self.session_factory):
+            with patch("app.services.notifier.docker_service.get_states", return_value={"container-123": "exited"}):
+                notifier.check_and_fire()
+
+        self.assertEqual(self._log_count(), 1)
+        self.assertIn("Container 'Harbor Test' is exited.", self._messages()[0])
+
+    def test_notifier_does_not_repeat_alert_within_cooldown(self) -> None:
+        self._seed_rule_and_event(threshold_minutes=5, down_minutes_ago=10)
+
+        with patch("app.services.notifier.SessionLocal", new=self.session_factory):
+            with patch("app.services.notifier.docker_service.get_states", return_value={"container-123": "exited"}):
+                notifier.check_and_fire()
+                notifier.check_and_fire()
+
+        self.assertEqual(self._log_count(), 1)
 
     def test_notifier_skips_cycle_when_docker_poll_fails(self) -> None:
         self._seed_rule_and_event(threshold_minutes=5, down_minutes_ago=10)
