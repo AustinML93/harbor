@@ -11,14 +11,16 @@ This document captures product direction, feature ideas, and positioning notes t
 ## Near-Term Bets
 
 - Per-container CPU and RAM history, especially lightweight sparklines and recent trend views.
-- Operations timeline:
-  combine container lifecycle transitions, alerts, recoveries, and restart history into a useful activity stream.
+- Resource attribution:
+  help the owner quickly answer which containers have been using CPU/RAM recently, not just what the host is doing overall.
+- Container detail trends:
+  make it easy to inspect one service's resource behavior over time without turning the app into a generic Docker admin panel.
 - Better service discovery heuristics:
   infer likely URLs, categories, icons, and descriptions from running containers and exposed ports.
 - Notifier polish:
-  clearer alert messaging, better state wording, and possibly recovery notifications when a container comes back up.
+  clearer alert messaging, better state wording, and richer event context.
 - Operations visibility:
-  surface recent failures, restart history, unhealthy containers, and other issues that matter in day-to-day homelab management.
+  surface recent failures, restart history, unhealthy containers, recoveries, and other issues that matter in day-to-day homelab management.
 
 ## Longer-Term Ideas
 
@@ -28,6 +30,13 @@ This document captures product direction, feature ideas, and positioning notes t
   help users quickly understand what is running where.
 - Event timelines:
   combine uptime transitions, notifications, and container state changes into a useful activity history.
+
+## Completed Directional Bets
+
+- Operations timeline:
+  dashboard now combines container lifecycle transitions, alerts, and recoveries into a useful activity stream.
+- Recovery notifications:
+  Harbor now records and sends a recovery event after a down alert when the container comes back up.
 
 ## Strategic Cautions
 

@@ -66,7 +66,7 @@ List, inspect, and control Docker containers.
 - `[x]` `POST /api/containers/{id}/restart` — restart container
 - `[x]` `GET /api/containers/{id}/logs` — last N lines (query param `lines=100`)
 - `[x]` `UptimeEvent` model — record state transitions to SQLite
-- `[ ]` Uptime calculation — from events, compute % uptime over last 24h / 7d
+- `[x]` Uptime calculation — from events, compute % uptime over last 24h
 - `[x]` Frontend: Containers page with `ContainerTable`
 - `[x]` Frontend: Status `Badge` component (running/stopped/restarting/paused)
 - `[x]` Frontend: `ActionMenu` with start/stop/restart buttons + confirmation for stop
@@ -149,16 +149,57 @@ Alert when containers go down.
 - `[x]` Frontend: Webhook URL input + test button
 - `[x]` Frontend: Alert history in Settings (last 50 entries)
 - `[x]` `POST /api/notifications/test-webhook` — verify webhook URL is reachable
+- `[x]` Recovery notifications — log/send one recovery event after a down alert when the container returns to running
 
 ### Acceptance Criteria
 - Container down > threshold triggers webhook POST
 - Alert does not re-fire within cooldown period
 - Rule can be disabled without deletion
 - Alert history visible in UI (last 50 alerts)
+- Recovery event visible in alert history/timeline after a previously alerted container returns to running
 
 ---
 
-## Phase 7 — Polish & Production Readiness
+## Phase 7 — Operations Command Center
+
+Make Harbor better at answering “what happened recently?” without becoming a generic Docker admin panel.
+
+### Tasks
+- `[x]` `GET /api/operations/timeline` — merge container lifecycle and notification events
+- `[x]` Dashboard: Recent Activity panel
+- `[x]` Product direction docs — prioritize command-center visibility over near-term Portainer-style management
+- `[ ]` Timeline filtering by severity/type
+- `[ ]` Dedicated Activity page if dashboard density becomes limiting
+
+### Acceptance Criteria
+- Dashboard surfaces recent container starts/stops/exits, alerts, and recoveries
+- Timeline remains read-only and operationally focused
+- Compose/stack management remains deferred
+
+---
+
+## Phase 8 — Container Resource History
+
+Attribute host resource usage to individual containers over time.
+
+### Tasks
+- `[ ]` `ContainerStat` model — timestamp, container id/name, CPU %, memory bytes/limit/%, optional network/block IO counters
+- `[ ]` Backend collector — sample Docker stats on an interval without blocking the event loop
+- `[ ]` Retention policy — prune old rows to a bounded window
+- `[ ]` `GET /api/containers/{id}/stats/history` — per-container history endpoint
+- `[ ]` `GET /api/containers/stats/recent` — compact recent stats for table/dashboard sparklines
+- `[ ]` Frontend: CPU/RAM sparklines in container list/cards
+- `[ ]` Frontend: container detail resource trend view
+- `[ ]` Tests for stat normalization and retention pruning
+
+### Acceptance Criteria
+- User can identify which containers recently consumed the most CPU/RAM
+- Historical views stay lightweight enough for a single-host homelab SQLite deployment
+- No orchestration/resource-limit controls are introduced in this phase
+
+---
+
+## Phase 9 — Polish & Production Readiness
 
 ### UI/UX
 - `[ ]` Skeleton loaders for all data-loading states
@@ -194,7 +235,6 @@ These are intentionally out of scope for the current build but worth noting:
 
 - **Portainer-style full container management** — compose file authoring, create/build containers from the UI, network and volume management, image browser and pruning. Large scope; treat as a future phase if Harbor grows toward a full Docker management tool.
 - **Docker Compose file management** — view/edit compose files in UI (subset of the above)
-- **Container resource graphs** — per-container CPU/RAM sparklines (requires Docker stats streaming)
 - **Multi-host** — connect to remote Docker hosts via TCP
 - **Notification channels beyond webhooks** — email, Slack, ntfy.sh, Gotify
 - **User management** — multiple users with roles (beyond single-password)
