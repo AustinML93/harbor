@@ -202,18 +202,21 @@ Harbor is being built in phases. Here's where things stand:
 ### Phase 2 — Analytics & Alerting (In Progress)
 
 - [x] Historical system stats (CPU, RAM, Disk) with sparkline visualizations
+- [x] Per-container resource history backend (CPU/RAM samples and history endpoints)
 - [x] Container down alerts with webhook delivery (Slack, ntfy, Gotify, etc.)
 - [ ] Per-container CPU and RAM sparklines
 - [x] Notification rule management UI
 - [x] Alert history log
 
-### Phase 3 — Orchestration (Up Next)
-- Docker Compose / Stack Management (The Portainer Killer)
-- Allow users to deploy new apps, edit configurations, and spin stacks up/down
+### Phase 3 — Command Center Polish (Up Next)
+- Per-container CPU and RAM sparklines
+- Container detail resource trend views
+- Richer activity history for failures, recoveries, and restarts
 
 ### Future / considering
 
 - Multi-host support (remote Docker via TCP)
+- Guided compose-aware workflows
 - Docker Compose file viewer
 - Image management (pull, prune, list)
 - Additional notification channels (email, Pushover)

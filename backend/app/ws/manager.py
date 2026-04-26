@@ -81,6 +81,7 @@ class ConnectionManager:
           - Every 1s:  system stats broadcast
           - Every 5s:  container list broadcast + uptime event recording
           - Every 30s: notification rule engine
+          - Every 60s: per-container resource history saving
 
         Blocking sync calls (psutil, Docker SDK) are offloaded to the thread
         pool via run_in_executor so they never stall the event loop.
@@ -91,12 +92,14 @@ class ConnectionManager:
         loop = asyncio.get_event_loop()
         container_tick = 0
         alert_tick = 0
+        container_history_tick = 0
         history_tick = 0
 
         while True:
             await asyncio.sleep(1)
             container_tick += 1
             alert_tick += 1
+            container_history_tick += 1
             history_tick += 1
 
             # System stats — every second
@@ -125,6 +128,14 @@ class ConnectionManager:
                     await loop.run_in_executor(None, notifier.check_and_fire)
                 except Exception as e:
                     logger.debug("Notifier error: %s", e)
+
+            # Container resource history saving — every 60 seconds
+            if container_history_tick >= 60:
+                container_history_tick = 0
+                try:
+                    await loop.run_in_executor(None, docker_service.save_container_stats_history)
+                except Exception as e:
+                    logger.debug("Container history save error: %s", e)
 
             # History saving — every 5 minutes (300 seconds)
             if history_tick >= 300:

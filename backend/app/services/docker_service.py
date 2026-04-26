@@ -9,7 +9,13 @@ from docker.errors import DockerException, NotFound
 from fastapi import HTTPException
 
 from app.core.config import settings
-from app.schemas.container import ContainerDetail, ContainerSummary, PortMapping
+from app.schemas.container import (
+    ContainerDetail,
+    ContainerRecentStat,
+    ContainerStatPoint,
+    ContainerSummary,
+    PortMapping,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -51,6 +57,79 @@ def _parse_ports(ports: dict) -> list[PortMapping]:
         else:
             result.append(PortMapping(host_port=None, container_port=port, protocol=proto))
     return result
+
+
+def _cpu_percent(stats: dict) -> float:
+    cpu_stats = stats.get("cpu_stats", {})
+    precpu_stats = stats.get("precpu_stats", {})
+    cpu_usage = cpu_stats.get("cpu_usage", {})
+    precpu_usage = precpu_stats.get("cpu_usage", {})
+
+    cpu_delta = cpu_usage.get("total_usage", 0) - precpu_usage.get("total_usage", 0)
+    system_delta = cpu_stats.get("system_cpu_usage", 0) - precpu_stats.get("system_cpu_usage", 0)
+    online_cpus = cpu_stats.get("online_cpus") or len(cpu_usage.get("percpu_usage") or []) or 1
+
+    if cpu_delta <= 0 or system_delta <= 0:
+        return 0.0
+    return round((cpu_delta / system_delta) * online_cpus * 100.0, 2)
+
+
+def _memory_usage_bytes(stats: dict) -> int:
+    memory = stats.get("memory_stats", {})
+    usage = int(memory.get("usage") or 0)
+    stats_detail = memory.get("stats", {})
+    cache = int(stats_detail.get("inactive_file") or stats_detail.get("cache") or 0)
+    return max(usage - cache, 0)
+
+
+def _network_totals(stats: dict) -> tuple[int | None, int | None]:
+    networks = stats.get("networks")
+    if not networks:
+        return None, None
+    rx = sum(int(iface.get("rx_bytes") or 0) for iface in networks.values())
+    tx = sum(int(iface.get("tx_bytes") or 0) for iface in networks.values())
+    return rx, tx
+
+
+def _block_io_totals(stats: dict) -> tuple[int | None, int | None]:
+    entries = stats.get("blkio_stats", {}).get("io_service_bytes_recursive") or []
+    if not entries:
+        return None, None
+    read = 0
+    write = 0
+    for entry in entries:
+        operation = str(entry.get("op", "")).lower()
+        value = int(entry.get("value") or 0)
+        if operation == "read":
+            read += value
+        elif operation == "write":
+            write += value
+    return read, write
+
+
+def _normalize_container_stats(container, stats: dict) -> dict:
+    memory_usage = _memory_usage_bytes(stats)
+    memory_limit = int(stats.get("memory_stats", {}).get("limit") or 0)
+    memory_percent = (
+        round((memory_usage / memory_limit) * 100.0, 2)
+        if memory_limit > 0
+        else 0.0
+    )
+    net_rx, net_tx = _network_totals(stats)
+    block_read, block_write = _block_io_totals(stats)
+
+    return {
+        "container_id": container.id,
+        "container_name": container.name.lstrip("/"),
+        "cpu_percent": _cpu_percent(stats),
+        "memory_usage_bytes": memory_usage,
+        "memory_limit_bytes": memory_limit,
+        "memory_percent": memory_percent,
+        "net_rx_bytes": net_rx,
+        "net_tx_bytes": net_tx,
+        "block_read_bytes": block_read,
+        "block_write_bytes": block_write,
+    }
 
 
 def _record_state_transitions(containers: list[tuple[str, str, str]]) -> None:
@@ -162,6 +241,110 @@ def _uptime_pct(container_id: str) -> Optional[float]:
 
 
 class DockerService:
+    def save_container_stats_history(self) -> None:
+        """Sample running container resource usage and prune old stat rows."""
+        try:
+            client = _get_client()
+            containers = client.containers.list()
+        except DockerException as e:
+            _reset_client()
+            logger.debug("Docker unavailable while sampling container stats: %s", e)
+            return
+
+        samples = []
+        for container in containers:
+            try:
+                stats = container.stats(stream=False)
+                samples.append(_normalize_container_stats(container, stats))
+            except DockerException as e:
+                logger.debug(
+                    "Skipping container stats for %s: %s",
+                    getattr(container, "name", "?"),
+                    e,
+                )
+
+        if not samples:
+            return
+
+        from datetime import timedelta
+
+        from app.core.database import SessionLocal
+        from app.models.container_stat import ContainerStat
+
+        cutoff = datetime.now(timezone.utc).replace(tzinfo=None) - timedelta(hours=24)
+        db = SessionLocal()
+        try:
+            for sample in samples:
+                db.add(ContainerStat(**sample))
+            db.query(ContainerStat).filter(ContainerStat.timestamp < cutoff).delete()
+            db.commit()
+        except Exception as e:
+            logger.error("Failed to write container stats: %s", e)
+            db.rollback()
+        finally:
+            db.close()
+
+    def get_container_stats_history(
+        self,
+        container_id: str,
+        hours: int = 24,
+    ) -> list[ContainerStatPoint]:
+        from datetime import timedelta
+
+        from app.core.database import SessionLocal
+        from app.models.container_stat import ContainerStat
+
+        cutoff = datetime.now(timezone.utc).replace(tzinfo=None) - timedelta(hours=hours)
+        db = SessionLocal()
+        try:
+            records = (
+                db.query(ContainerStat)
+                .filter(ContainerStat.container_id == container_id)
+                .filter(ContainerStat.timestamp >= cutoff)
+                .order_by(ContainerStat.timestamp.asc())
+                .all()
+            )
+            return [
+                ContainerStatPoint.model_validate(record, from_attributes=True)
+                for record in records
+            ]
+        finally:
+            db.close()
+
+    def get_recent_container_stats(self, limit: int = 50) -> list[ContainerRecentStat]:
+        from sqlalchemy import func
+
+        from app.core.database import SessionLocal
+        from app.models.container_stat import ContainerStat
+
+        db = SessionLocal()
+        try:
+            latest_by_container = (
+                db.query(
+                    ContainerStat.container_id.label("container_id"),
+                    func.max(ContainerStat.timestamp).label("timestamp"),
+                )
+                .group_by(ContainerStat.container_id)
+                .subquery()
+            )
+            records = (
+                db.query(ContainerStat)
+                .join(
+                    latest_by_container,
+                    (ContainerStat.container_id == latest_by_container.c.container_id)
+                    & (ContainerStat.timestamp == latest_by_container.c.timestamp),
+                )
+                .order_by(ContainerStat.cpu_percent.desc(), ContainerStat.memory_percent.desc())
+                .limit(limit)
+                .all()
+            )
+            return [
+                ContainerRecentStat.model_validate(record, from_attributes=True)
+                for record in records
+            ]
+        finally:
+            db.close()
+
     def list_containers(self) -> list[ContainerSummary]:
         try:
             client = _get_client()

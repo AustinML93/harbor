@@ -74,7 +74,7 @@ All real-time data (stats, container states) flows through a single WebSocket co
 
 **Framework:** FastAPI (Python 3.11)
 **Auth:** Single shared password (bcrypt hashed, initially sourced from env, then overrideable from the UI and stored in SQLite). Login returns a HS256 JWT. All REST routes and the WS handshake require a valid JWT.
-**Database:** SQLite via SQLAlchemy (sync). Four tables: `uptime_events`, `notification_rules`, `notification_log`, `settings`.
+**Database:** SQLite via SQLAlchemy (sync). Core tables include `uptime_events`, `notification_rules`, `notification_log`, `settings`, `system_stats`, and `container_stats`.
 **Docker:** Official `docker` Python SDK. Socket path is configurable.
 **System stats:** `psutil` for CPU, RAM, disk, network.
 **Real-time:** FastAPI native WebSockets. A single `ConnectionManager` maintains all active connections and fan-outs broadcast messages.
@@ -84,6 +84,8 @@ All real-time data (stats, container states) flows through a single WebSocket co
 every 1s  → collect system stats → broadcast to all WS clients
 every 5s  → poll container states → if changed, broadcast delta + record uptime event
 every 30s → run notification rule engine → fire alerts for containers down > threshold
+every 60s → sample per-container Docker stats → write container_stats history
+every 5m  → write system_stats history
 ```
 
 ---
@@ -120,6 +122,22 @@ CREATE TABLE notification_log (
     container_name  TEXT NOT NULL,
     message         TEXT NOT NULL,
     sent_at         DATETIME DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Per-container resource history for lightweight attribution
+CREATE TABLE container_stats (
+    id                  INTEGER PRIMARY KEY,
+    timestamp           DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    container_id        TEXT NOT NULL,
+    container_name      TEXT NOT NULL,
+    cpu_percent         FLOAT NOT NULL,
+    memory_usage_bytes  BIGINT NOT NULL,
+    memory_limit_bytes  BIGINT NOT NULL,
+    memory_percent      FLOAT NOT NULL,
+    net_rx_bytes        BIGINT,
+    net_tx_bytes        BIGINT,
+    block_read_bytes    BIGINT,
+    block_write_bytes   BIGINT
 );
 ```
 
@@ -207,7 +225,7 @@ harbor/
 │   │   │   ├── deps.py              # JWT auth FastAPI dependency
 │   │   │   └── routes/
 │   │   │       ├── auth.py          # POST /api/auth/login
-│   │   │       ├── containers.py    # Container list + actions
+│   │   │       ├── containers.py    # Container list, actions, stats history
 │   │   │       ├── notifications.py # Notification rules CRUD
 │   │   │       ├── services.py      # services.yml read/write
 │   │   │       └── system.py        # CPU/RAM/disk/network stats
@@ -216,6 +234,7 @@ harbor/
 │   │   │   ├── database.py          # SQLAlchemy engine + session
 │   │   │   └── security.py          # bcrypt + JWT helpers
 │   │   ├── models/
+│   │   │   ├── container_stat.py    # ContainerStat ORM
 │   │   │   ├── notification.py      # NotificationRule, NotificationLog ORM
 │   │   │   ├── setting.py           # Persistent app settings (password hash, etc.)
 │   │   │   ├── system_stat.py       # Historical CPU/RAM/disk snapshots

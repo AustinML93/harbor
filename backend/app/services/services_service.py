@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import logging
+import os
 from pathlib import Path
 from typing import Any
 
@@ -15,6 +16,24 @@ logger = logging.getLogger(__name__)
 class ServicesService:
     def _config_path(self) -> Path:
         return Path(settings.services_config_path)
+
+    def check_config_writable(self) -> bool:
+        path = self._config_path()
+        if path.exists():
+            if path.is_file() and os.access(path, os.W_OK):
+                return True
+            logger.warning("services.yml is not writable at %s; service tile edits will fail", path)
+            return False
+
+        parent = path.parent if str(path.parent) else Path(".")
+        if parent.exists() and os.access(parent, os.W_OK):
+            return True
+
+        logger.warning(
+            "services.yml does not exist and cannot be created at %s; service tile edits will fail",
+            path,
+        )
+        return False
 
     def list_services(self) -> list[ServiceItem]:
         path = self._config_path()

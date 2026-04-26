@@ -120,7 +120,7 @@ Configurable tiles for navigating to homelab services.
 - `[x]` Frontend: Services grid embedded in Dashboard (ServiceGrid, ServiceTile, add/edit/delete modal)
 - `[x]` Frontend: Auto-discovery modal — scan running containers by image name and offer to add as tiles
 - `[x]` Frontend: Icon picker with CDN-backed dashboard-icons library
-- `[ ]` **Backlog:** `services.yml` permissions — add a backend startup check that warns if `services.yml` is not writable.
+- `[x]` **Backlog:** `services.yml` permissions — add a backend startup check that warns if `services.yml` is not writable.
 
 ### Acceptance Criteria
 - `services.yml` additions appear in UI on next page load
@@ -168,7 +168,7 @@ Make Harbor better at answering “what happened recently?” without becoming a
 - `[x]` `GET /api/operations/timeline` — merge container lifecycle and notification events
 - `[x]` Dashboard: Recent Activity panel
 - `[x]` Product direction docs — prioritize command-center visibility over near-term Portainer-style management
-- `[ ]` Timeline filtering by severity/type
+- `[x]` Timeline filtering by severity/type
 - `[ ]` Dedicated Activity page if dashboard density becomes limiting
 
 ### Acceptance Criteria
@@ -183,14 +183,14 @@ Make Harbor better at answering “what happened recently?” without becoming a
 Attribute host resource usage to individual containers over time.
 
 ### Tasks
-- `[ ]` `ContainerStat` model — timestamp, container id/name, CPU %, memory bytes/limit/%, optional network/block IO counters
-- `[ ]` Backend collector — sample Docker stats on an interval without blocking the event loop
-- `[ ]` Retention policy — prune old rows to a bounded window
-- `[ ]` `GET /api/containers/{id}/stats/history` — per-container history endpoint
-- `[ ]` `GET /api/containers/stats/recent` — compact recent stats for table/dashboard sparklines
+- `[x]` `ContainerStat` model — timestamp, container id/name, CPU %, memory bytes/limit/%, optional network/block IO counters
+- `[x]` Backend collector — sample Docker stats on an interval without blocking the event loop
+- `[x]` Retention policy — prune old rows to a bounded window
+- `[x]` `GET /api/containers/{id}/stats/history` — per-container history endpoint
+- `[x]` `GET /api/containers/stats/recent` — compact recent stats for table/dashboard sparklines
 - `[ ]` Frontend: CPU/RAM sparklines in container list/cards
 - `[ ]` Frontend: container detail resource trend view
-- `[ ]` Tests for stat normalization and retention pruning
+- `[x]` Tests for stat normalization and retention pruning
 
 ### Acceptance Criteria
 - User can identify which containers recently consumed the most CPU/RAM

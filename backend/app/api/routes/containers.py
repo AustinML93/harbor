@@ -1,7 +1,12 @@
 from fastapi import APIRouter, Depends, HTTPException, Query
 
 from app.api.deps import get_current_user
-from app.schemas.container import ContainerDetail, ContainerSummary
+from app.schemas.container import (
+    ContainerDetail,
+    ContainerRecentStat,
+    ContainerStatPoint,
+    ContainerSummary,
+)
 from app.services.docker_service import docker_service
 
 router = APIRouter()
@@ -11,6 +16,25 @@ router = APIRouter()
 async def list_containers(_: str = Depends(get_current_user)):
     """List all containers (running and stopped)."""
     return docker_service.list_containers()
+
+
+@router.get("/stats/recent", response_model=list[ContainerRecentStat])
+async def get_recent_container_stats(
+    limit: int = Query(default=50, ge=1, le=200),
+    _: str = Depends(get_current_user),
+):
+    """Return the latest resource sample for each recently observed container."""
+    return docker_service.get_recent_container_stats(limit=limit)
+
+
+@router.get("/{container_id}/stats/history", response_model=list[ContainerStatPoint])
+async def get_container_stats_history(
+    container_id: str,
+    hours: int = Query(default=24, ge=1, le=168),
+    _: str = Depends(get_current_user),
+):
+    """Return resource history for one container."""
+    return docker_service.get_container_stats_history(container_id, hours=hours)
 
 
 @router.get("/{container_id}", response_model=ContainerDetail)

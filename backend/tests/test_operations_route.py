@@ -67,6 +67,59 @@ class OperationsRouteTests(unittest.TestCase):
         self.assertEqual(result[0].severity, "danger")
         self.assertEqual(result[1].title, "Container started")
 
+    def test_timeline_filters_by_kind_and_severity(self) -> None:
+        now = datetime.now(timezone.utc)
+        with self.session_factory() as db:
+            rule = NotificationRule(
+                container_id="container-123",
+                container_name="Harbor Test",
+                enabled=True,
+                down_threshold_minutes=5,
+            )
+            db.add(rule)
+            db.flush()
+            db.add(
+                UptimeEvent(
+                    container_id="container-123",
+                    container_name="Harbor Test",
+                    event_type="start",
+                    timestamp=now - timedelta(minutes=3),
+                )
+            )
+            db.add(
+                UptimeEvent(
+                    container_id="container-123",
+                    container_name="Harbor Test",
+                    event_type="die",
+                    timestamp=now - timedelta(minutes=2),
+                )
+            )
+            db.add(
+                NotificationLog(
+                    rule_id=rule.id,
+                    container_name="Harbor Test",
+                    message="Container 'Harbor Test' recovered and is running again.",
+                    sent_at=now - timedelta(minutes=1),
+                )
+            )
+            db.commit()
+
+        with self.session_factory() as db:
+            result = asyncio.run(
+                get_timeline(
+                    limit=10,
+                    kind=["container"],
+                    severity=["danger"],
+                    db=db,
+                    _="harbor-admin",
+                )
+            )
+
+        self.assertEqual(len(result), 1)
+        self.assertEqual(result[0].kind, "container")
+        self.assertEqual(result[0].severity, "danger")
+        self.assertEqual(result[0].title, "Container exited")
+
 
 if __name__ == "__main__":
     unittest.main()

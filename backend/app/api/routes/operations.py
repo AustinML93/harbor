@@ -1,3 +1,5 @@
+from typing import Annotated, Literal
+
 from fastapi import APIRouter, Depends, Query
 from sqlalchemy.orm import Session
 
@@ -47,6 +49,8 @@ def _notification_event(log: NotificationLog) -> OperationEvent:
 @router.get("/timeline", response_model=list[OperationEvent])
 async def get_timeline(
     limit: int = Query(default=50, ge=1, le=200),
+    kind: Annotated[list[Literal["container", "notification"]] | None, Query()] = None,
+    severity: Annotated[list[Literal["success", "warning", "danger", "info"]] | None, Query()] = None,
     db: Session = Depends(get_db),
     _: str = Depends(get_current_user),
 ):
@@ -65,4 +69,8 @@ async def get_timeline(
 
     events = [_container_event(event) for event in uptime_events]
     events.extend(_notification_event(log) for log in notification_events)
+    if kind:
+        events = [event for event in events if event.kind in kind]
+    if severity:
+        events = [event for event in events if event.severity in severity]
     return sorted(events, key=lambda event: event.timestamp, reverse=True)[:limit]

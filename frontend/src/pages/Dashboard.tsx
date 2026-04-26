@@ -15,6 +15,15 @@ import { DiscoveryModal } from "../components/services/DiscoveryModal";
 import { Modal } from "../components/ui/Modal";
 import type { OperationEvent } from "../types";
 
+type TimelineFilter = "all" | "problems" | "containers" | "notifications";
+
+const timelineFilters: { value: TimelineFilter; label: string }[] = [
+  { value: "all", label: "All" },
+  { value: "problems", label: "Issues" },
+  { value: "containers", label: "Containers" },
+  { value: "notifications", label: "Alerts" },
+];
+
 function formatEventTime(value: string) {
   const date = new Date(value);
   const now = Date.now();
@@ -53,9 +62,20 @@ function severityBackground(severity: OperationEvent["severity"]) {
 }
 
 function OperationsTimeline() {
+  const [filter, setFilter] = useState<TimelineFilter>("all");
+
   const { data: events = [], isLoading } = useQuery<OperationEvent[]>({
-    queryKey: ["operations-timeline"],
-    queryFn: () => api.get("/operations/timeline?limit=8").then((r) => r.data),
+    queryKey: ["operations-timeline", filter],
+    queryFn: () => {
+      const params = new URLSearchParams({ limit: "8" });
+      if (filter === "problems") {
+        params.append("severity", "danger");
+        params.append("severity", "warning");
+      }
+      if (filter === "containers") params.append("kind", "container");
+      if (filter === "notifications") params.append("kind", "notification");
+      return api.get(`/operations/timeline?${params.toString()}`).then((r) => r.data);
+    },
     refetchInterval: 30000,
   });
 
@@ -64,6 +84,26 @@ function OperationsTimeline() {
       <div className="flex items-center justify-between">
         <h3 className="text-xs font-semibold uppercase tracking-wider" style={{ color: "var(--color-muted)" }}>Recent Activity</h3>
         <Activity size={16} style={{ color: "var(--color-muted)" }} />
+      </div>
+
+      <div className="grid grid-cols-4 gap-1 rounded-lg border p-1" style={{ borderColor: "var(--color-border)" }}>
+        {timelineFilters.map((option) => {
+          const active = option.value === filter;
+          return (
+            <button
+              key={option.value}
+              type="button"
+              onClick={() => setFilter(option.value)}
+              className="h-8 rounded-md px-2 text-xs font-medium"
+              style={{
+                backgroundColor: active ? "var(--color-accent-dim)" : "transparent",
+                color: active ? "var(--color-accent)" : "var(--color-muted)",
+              }}
+            >
+              {option.label}
+            </button>
+          );
+        })}
       </div>
 
       {isLoading ? (

@@ -20,7 +20,7 @@ class Base(DeclarativeBase):
 def init_db() -> None:
     """Create all tables. Called on application startup."""
     # Import models so SQLAlchemy knows about them before create_all
-    from app.models import notification, uptime, setting, system_stat  # noqa: F401
+    from app.models import container_stat, notification, uptime, setting, system_stat  # noqa: F401
 
     Base.metadata.create_all(bind=engine)
 

@@ -7,6 +7,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from app.core.config import settings
 from app.core.database import init_db
 from app.api.routes import auth, containers, notifications, operations, services, system
+from app.services.services_service import services_service
 from app.ws.manager import ws_manager
 
 
@@ -14,6 +15,7 @@ from app.ws.manager import ws_manager
 async def lifespan(app: FastAPI):
     # Startup
     init_db()
+    services_service.check_config_writable()
     broadcast_task = asyncio.create_task(ws_manager.broadcast_loop())
     yield
     # Shutdown
