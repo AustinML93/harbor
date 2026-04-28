@@ -11,9 +11,30 @@ This document tracks upcoming features and architectural improvements for Harbor
    - Gather first-pass feedback before adding broader Docker management features.
 
 2. **Operations Visibility Polish**
+   - Add a "What needs attention?" dashboard summary for down containers, recent alerts, hot containers, and stale data.
    - Expand the activity timeline with richer event types.
    - Surface recent failures, restart history, unhealthy containers, and recovery events clearly.
    - Consider a dedicated Activity page once dashboard timeline density becomes limiting.
+
+3. **Resource Insight Polish**
+   - Extend top resource users beyond current samples:
+     top CPU/RAM over the last 24h and recent peak usage.
+   - Add lightweight anomaly hints such as "higher than usual" or "memory rising" from recent averages.
+   - Make empty/loading states explicit:
+     resource trends appear after Harbor has collected a few 60s samples.
+
+4. **Container Detail Experience**
+   - Grow the resource deep-dive into a fuller container detail drawer/page.
+   - Candidate tabs:
+     Overview, Resources, Logs, Events, and Alerts.
+   - Keep the experience read-oriented and operational; avoid broad orchestration controls in this pass.
+
+5. **First-Run And Reliability UX**
+   - Add a first-run checklist:
+     password changed, Docker socket connected, `services.yml` writable, first resource sample collected, alerts configured.
+   - Add status confidence indicators:
+     WebSocket connected, Docker reachable, last stats sample time, alerts active.
+   - Consider a demo mode or seed script for GitHub screenshots and forum evaluation.
 
 ## Recently Completed
 - Frontend per-container resource views:
