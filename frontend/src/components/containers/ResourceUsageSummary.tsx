@@ -62,7 +62,7 @@ function TopList({
                   {item.container_name}
                 </p>
                 <p className="text-xs" style={{ color: "var(--color-muted)" }}>
-                  {valueKey === "memory_percent" ? formatBytes(item.memory_usage_bytes) : "Latest sample"}
+                  {valueKey === "memory_percent" ? formatBytes(item.memory_usage_bytes) : "Current CPU"}
                 </p>
               </div>
               <span className="font-mono text-sm font-semibold tabular-nums" style={{ color: accent }}>
