@@ -188,8 +188,8 @@ Attribute host resource usage to individual containers over time.
 - `[x]` Retention policy — prune old rows to a bounded window
 - `[x]` `GET /api/containers/{id}/stats/history` — per-container history endpoint
 - `[x]` `GET /api/containers/stats/recent` — compact recent stats for table/dashboard sparklines
-- `[ ]` Frontend: CPU/RAM sparklines in container list/cards
-- `[ ]` Frontend: container detail resource trend view
+- `[x]` Frontend: CPU/RAM sparklines in container list/cards
+- `[x]` Frontend: container detail resource trend view
 - `[x]` Tests for stat normalization and retention pruning
 
 ### Acceptance Criteria

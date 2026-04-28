@@ -203,14 +203,14 @@ Harbor is being built in phases. Here's where things stand:
 
 - [x] Historical system stats (CPU, RAM, Disk) with sparkline visualizations
 - [x] Per-container resource history backend (CPU/RAM samples and history endpoints)
+- [x] Per-container CPU and RAM sparklines
+- [x] Container detail resource trend views
+- [x] Top container resource users summary
 - [x] Container down alerts with webhook delivery (Slack, ntfy, Gotify, etc.)
-- [ ] Per-container CPU and RAM sparklines
 - [x] Notification rule management UI
 - [x] Alert history log
 
 ### Phase 3 — Command Center Polish (Up Next)
-- Per-container CPU and RAM sparklines
-- Container detail resource trend views
 - Richer activity history for failures, recoveries, and restarts
 
 ### Future / considering

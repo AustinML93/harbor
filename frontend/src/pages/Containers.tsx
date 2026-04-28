@@ -1,25 +1,58 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { useContainers, useContainerAction, useContainerDelete } from "../hooks/useContainers";
+import { useContainerStatsHistories, useContainerStatsHistory, useRecentContainerStats } from "../hooks/useContainerStats";
+import api from "../lib/api";
 import { ContainerTable } from "../components/containers/ContainerTable";
+import { ContainerResourceModal } from "../components/containers/ContainerResourceModal";
+import { ResourceUsageSummary } from "../components/containers/ResourceUsageSummary";
 import { Modal } from "../components/ui/Modal";
-import type { ContainerSummary } from "../types";
+import type { ContainerRecentStat, ContainerStatPoint, ContainerSummary } from "../types";
 
 export default function Containers() {
   const containers = useContainers();
   const { mutate: runAction, isPending } = useContainerAction();
   const { mutate: deleteContainer, isPending: isDeleting } = useContainerDelete();
+  const { data: recentStats = [], isLoading: recentStatsLoading } = useRecentContainerStats(50);
 
   const [logContainerId, setLogContainerId] = useState<string | null>(null);
   const [logs, setLogs] = useState<string[]>([]);
   const [logsLoading, setLogsLoading] = useState(false);
   const [deleteTarget, setDeleteTarget] = useState<ContainerSummary | null>(null);
+  const [resourceTarget, setResourceTarget] = useState<ContainerSummary | null>(null);
+
+  const containerIds = useMemo(() => containers.map((container) => container.id), [containers]);
+  const historyQueries = useContainerStatsHistories(containerIds, 6);
+  const { data: selectedHistory = [], isLoading: selectedHistoryLoading } = useContainerStatsHistory(
+    resourceTarget?.id ?? null,
+    24
+  );
+
+  const recentStatsById = useMemo<Record<string, ContainerRecentStat | undefined>>(
+    () => Object.fromEntries(recentStats.map((stat) => [stat.container_id, stat])),
+    [recentStats]
+  );
+
+  const historyById = useMemo<Record<string, ContainerStatPoint[] | undefined>>(
+    () =>
+      Object.fromEntries(
+        containers.map((container, index) => [container.id, historyQueries[index]?.data ?? []])
+      ),
+    [containers, historyQueries]
+  );
+
+  const statsLoadingById = useMemo<Record<string, boolean | undefined>>(
+    () =>
+      Object.fromEntries(
+        containers.map((container, index) => [container.id, historyQueries[index]?.isLoading])
+      ),
+    [containers, historyQueries]
+  );
 
   async function openLogs(containerId: string) {
     setLogContainerId(containerId);
     setLogsLoading(true);
     setLogs([]);
     try {
-      const { default: api } = await import("../lib/api");
       const { data } = await api.get(`/containers/${containerId}/logs?lines=200`);
       setLogs(data.logs ?? []);
     } catch {
@@ -48,12 +81,18 @@ export default function Containers() {
         </p>
       </div>
 
+      <ResourceUsageSummary stats={recentStats} loading={recentStatsLoading} />
+
       <ContainerTable
         containers={containers}
         onAction={(id, action) => runAction({ id, action })}
         onViewLogs={openLogs}
+        onViewStats={setResourceTarget}
         onDelete={setDeleteTarget}
         actionPending={isPending}
+        recentStatsById={recentStatsById}
+        historyById={historyById}
+        statsLoadingById={statsLoadingById}
       />
 
       {/* Log drawer */}
@@ -79,6 +118,20 @@ export default function Containers() {
             ))
           )}
         </div>
+      </Modal>
+
+      {/* Resource trend drawer */}
+      <Modal
+        isOpen={resourceTarget !== null}
+        onClose={() => setResourceTarget(null)}
+        title={`Resource trends — ${resourceTarget?.name ?? ""}`}
+        size="xl"
+      >
+        <ContainerResourceModal
+          container={resourceTarget}
+          history={selectedHistory}
+          loading={selectedHistoryLoading}
+        />
       </Modal>
 
       {/* Delete confirmation */}

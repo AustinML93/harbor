@@ -55,6 +55,22 @@ export interface ContainerDetail extends ContainerSummary {
   finished_at: string | null;
 }
 
+export interface ContainerStatPoint {
+  timestamp: string;
+  container_id: string;
+  container_name: string;
+  cpu_percent: number;
+  memory_usage_bytes: number;
+  memory_limit_bytes: number;
+  memory_percent: number;
+  net_rx_bytes: number | null;
+  net_tx_bytes: number | null;
+  block_read_bytes: number | null;
+  block_write_bytes: number | null;
+}
+
+export type ContainerRecentStat = ContainerStatPoint;
+
 export type ContainerAction = "start" | "stop" | "restart";
 
 export interface ServiceItem {

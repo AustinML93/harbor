@@ -4,22 +4,14 @@ This document tracks upcoming features and architectural improvements for Harbor
 
 ## Up Next
 
-1. **Container Resource History**
-   - Add lightweight frontend sparklines and historical views that reveal which services are using system resources.
-   - Keep the experience focused on observability before adding heavier orchestration features.
-   - Backend groundwork is complete:
-     `container_stats` table, 60s Docker stats sampling, 24h pruning, recent stats endpoint, per-container history endpoint, and normalization/retention tests.
-   - Next suggested implementation path:
-     - Add CPU/RAM sparklines to container list/cards from `/api/containers/stats/recent`.
-     - Add a container detail resource trend view from `/api/containers/{id}/stats/history`.
-     - Start with read-only observability; avoid resource limits or orchestration controls for this pass.
-
-2. **Operations Visibility Polish**
+1. **Operations Visibility Polish**
    - Expand the activity timeline with richer event types.
    - Surface recent failures, restart history, unhealthy containers, and recovery events clearly.
    - Consider a dedicated Activity page once dashboard timeline density becomes limiting.
 
 ## Recently Completed
+- Frontend per-container resource views:
+  top CPU/RAM users, container table sparklines, and 24h resource trend details.
 - Backend groundwork for per-container resource history.
 - Frontend ESLint setup so `npm run lint` works again.
 - Timeline filtering by event type and severity in the dashboard Recent Activity panel and `/api/operations/timeline`.
