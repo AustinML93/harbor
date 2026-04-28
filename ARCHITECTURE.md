@@ -88,6 +88,8 @@ every 60s → sample per-container Docker stats → write container_stats histor
 every 5m  → write system_stats history
 ```
 
+The frontend uses the latest `container_stats` sample for top CPU/RAM summaries and compact table sparklines, then loads 24-hour per-container history for the resource trend deep-dive modal.
+
 ---
 
 ### Data Layer

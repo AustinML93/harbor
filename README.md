@@ -1,6 +1,6 @@
 # Harbor
 
-**A clean, self-hosted dashboard for your homelab.**
+**A polished, self-hosted command center for your homelab.**
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![Status: Active Development](https://img.shields.io/badge/status-active%20development-orange)](#roadmap)
@@ -9,7 +9,7 @@
 
 ## What is this?
 
-Harbor is a homelab dashboard that gives you real-time visibility into your Docker containers and server health — CPU, RAM, disk, network — from a single polished UI. Start, stop, and restart containers without touching a terminal. Configure quick-launch tiles for all your self-hosted services so everything is one click away.
+Harbor is a homelab dashboard that gives you real-time visibility into your Docker containers and server health — CPU, RAM, disk, network, uptime, alerts, and per-container resource trends — from a single polished UI. Start, stop, and restart containers without touching a terminal. Configure quick-launch tiles for all your self-hosted services so everything is one click away.
 
 It's designed to be dead simple to deploy (`docker compose up -d`), opinionated about doing a few things well, and good-looking enough that you'd actually want it open on a second monitor. No Kubernetes required, no cloud dependency, no telemetry.
 
@@ -19,7 +19,14 @@ It's designed to be dead simple to deploy (`docker compose up -d`), opinionated 
 
 ## Screenshots
 
-> Screenshots coming soon — deploy the stack locally and see it for yourself in under 2 minutes.
+Screenshots are coming next. The README is ready for these image slots once captures are added under `docs/screenshots/`:
+
+| View | Planned image |
+|------|---------------|
+| Dashboard and service launcher | `docs/screenshots/dashboard.png` |
+| Container list with resource sparklines | `docs/screenshots/containers.png` |
+| Container resource trend deep dive | `docs/screenshots/container-resource-trends.png` |
+| Settings and alert rules | `docs/screenshots/settings.png` |
 
 ---
 
@@ -199,7 +206,7 @@ Harbor is being built in phases. Here's where things stand:
 - [x] Single-password authentication with JWT
 - [x] Mobile responsive layout
 
-### Phase 2 — Analytics & Alerting (In Progress)
+### Phase 2 — Analytics & Alerting (Complete)
 
 - [x] Historical system stats (CPU, RAM, Disk) with sparkline visualizations
 - [x] Per-container resource history backend (CPU/RAM samples and history endpoints)
@@ -211,7 +218,9 @@ Harbor is being built in phases. Here's where things stand:
 - [x] Alert history log
 
 ### Phase 3 — Command Center Polish (Up Next)
+
 - Richer activity history for failures, recoveries, and restarts
+- Public launch polish: screenshots, demo notes, and first-pass forum feedback
 
 ### Future / considering
 

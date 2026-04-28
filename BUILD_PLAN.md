@@ -222,10 +222,11 @@ Attribute host resource usage to individual containers over time.
 
 ### Deploy
 - `[x]` Frontend multi-stage Dockerfile (build → nginx)
-- `[ ]` Backend Dockerfile with non-root user
+- `[x]` Backend Dockerfile with non-root user
 - `[x]` `docker-compose.yml` health checks on both services
 - `[x]` `docker-compose.yml` restart policies
-- `[ ]` README with quickstart, env var documentation, screenshot
+- `[x]` README quickstart and env var documentation
+- `[ ]` README screenshots
 
 ---
 

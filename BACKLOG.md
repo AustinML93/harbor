@@ -4,7 +4,13 @@ This document tracks upcoming features and architectural improvements for Harbor
 
 ## Up Next
 
-1. **Operations Visibility Polish**
+1. **Public Launch Polish**
+   - Capture README/GitHub screenshots:
+     dashboard, container sparklines, resource trend deep dive, and settings/alerts.
+   - Draft a short OMV forum post with setup expectations, Docker socket notes, and current limitations.
+   - Gather first-pass feedback before adding broader Docker management features.
+
+2. **Operations Visibility Polish**
    - Expand the activity timeline with richer event types.
    - Surface recent failures, restart history, unhealthy containers, and recovery events clearly.
    - Consider a dedicated Activity page once dashboard timeline density becomes limiting.
