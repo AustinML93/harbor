@@ -80,7 +80,7 @@ function OperationsTimeline() {
   });
 
   return (
-    <div className="harbor-card p-5 space-y-4">
+    <div className="harbor-card harbor-card-static p-5 space-y-4">
       <div className="flex items-center justify-between">
         <h3 className="text-xs font-semibold uppercase tracking-wider" style={{ color: "var(--color-muted)" }}>Recent Activity</h3>
         <Activity size={16} style={{ color: "var(--color-muted)" }} />
@@ -94,11 +94,9 @@ function OperationsTimeline() {
               key={option.value}
               type="button"
               onClick={() => setFilter(option.value)}
-              className="h-8 rounded-md px-2 text-xs font-medium"
-              style={{
-                backgroundColor: active ? "var(--color-accent-dim)" : "transparent",
-                color: active ? "var(--color-accent)" : "var(--color-muted)",
-              }}
+              className={`h-8 rounded-md px-2 text-xs font-medium ${
+                active ? "timeline-filter-active" : "timeline-filter"
+              }`}
             >
               {option.label}
             </button>
@@ -200,7 +198,7 @@ function DockerSummary({ containers }: { containers: ContainerSummary[] }) {
   const total = containers.length;
   
   return (
-    <div className="harbor-card p-5 space-y-4">
+    <div className="harbor-card harbor-card-static p-5 space-y-4">
       <h3 className="text-xs font-semibold uppercase tracking-wider" style={{ color: "var(--color-muted)" }}>Docker Status</h3>
       <div className="space-y-3">
         <div className="flex justify-between items-center text-sm">

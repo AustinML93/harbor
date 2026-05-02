@@ -54,7 +54,7 @@ function Sparkline({ data, dataKey, percent, defaultColor }: { data: StatHistory
 export function StatCard({ label, value, detail, icon, accent, percent, loading, history, historyDataKey }: Props) {
   if (loading) {
     return (
-      <div className="harbor-card animate-pulse p-5">
+      <div className="harbor-card harbor-card-static animate-pulse p-5">
         <div className="flex items-center justify-between">
           <div className="h-4 w-14 rounded" style={{ backgroundColor: "var(--color-border)" }} />
           <div className="h-9 w-9 rounded-xl" style={{ backgroundColor: "var(--color-border)" }} />
@@ -67,7 +67,7 @@ export function StatCard({ label, value, detail, icon, accent, percent, loading,
   }
 
   return (
-    <div className="harbor-card p-5">
+    <div className="harbor-card harbor-card-static p-5">
       <div className="flex items-center justify-between">
         <span className="text-xs font-semibold uppercase tracking-wider" style={{ color: "var(--color-muted)" }}>
           {label}

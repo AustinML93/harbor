@@ -130,6 +130,11 @@ body {
     box-shadow: var(--shadow-card-hover);
   }
 
+  .harbor-card-static:hover {
+    background-color: var(--color-card);
+    box-shadow: var(--shadow-card);
+  }
+
   /* Micro-animations */
   .hover-lift {
     transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.2s ease;
@@ -180,5 +185,19 @@ body {
   }
   [data-theme="dark"] .harbor-input {
     background-color: rgba(0, 0, 0, 0.2);
+  }
+
+  .timeline-filter {
+    color: var(--color-muted);
+  }
+
+  .timeline-filter:hover {
+    background-color: var(--color-border);
+    color: var(--color-text);
+  }
+
+  .timeline-filter-active {
+    background-color: var(--color-accent-dim);
+    color: var(--color-accent);
   }
 }
