@@ -1,5 +1,5 @@
 import { useState, useMemo } from "react";
-import { Activity, Bell, CheckCircle2, Cpu, HardDrive, MemoryStick, Network, Plus, Search, Compass } from "lucide-react";
+import { Activity, AlertTriangle, Bell, CheckCircle2, Cpu, HardDrive, MemoryStick, Network, Plus, Search, Compass } from "lucide-react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 
 import { useSystemStats } from "../hooks/useSystemStats";
@@ -13,7 +13,7 @@ import { ServiceGrid } from "../components/services/ServiceGrid";
 import { ServiceForm } from "../components/services/ServiceForm";
 import { DiscoveryModal } from "../components/services/DiscoveryModal";
 import { Modal } from "../components/ui/Modal";
-import type { OperationEvent } from "../types";
+import type { ContainerSummary, OperationEvent } from "../types";
 
 type TimelineFilter = "all" | "problems" | "containers" | "notifications";
 
@@ -153,8 +153,48 @@ function OperationsTimeline() {
   );
 }
 
-function DockerSummary() {
-  const containers = useContainers();
+function DashboardStatusBanner({
+  containers,
+  uptime,
+  hasStats,
+}: {
+  containers: ContainerSummary[];
+  uptime?: string;
+  hasStats: boolean;
+}) {
+  const total = containers.length;
+  const issueCount = containers.filter((c) => c.state !== "running").length;
+  const hasIssues = issueCount > 0;
+  const waitingForLiveData = !hasStats || total === 0;
+  const Icon = hasIssues || waitingForLiveData ? AlertTriangle : CheckCircle2;
+
+  const label = waitingForLiveData
+    ? "Waiting for live status"
+    : hasIssues
+    ? `${issueCount} container${issueCount === 1 ? "" : "s"} need attention`
+    : `All ${total} container${total === 1 ? "" : "s"} running`;
+
+  const detail = uptime ? `Uptime ${uptime}` : "Live telemetry";
+  const color = hasIssues || waitingForLiveData ? "var(--color-warning)" : "var(--color-success)";
+  const backgroundColor = hasIssues || waitingForLiveData ? "var(--color-warning-dim)" : "var(--color-success-dim)";
+
+  return (
+    <div
+      className="flex flex-col gap-2 rounded-xl border px-4 py-3 sm:flex-row sm:items-center sm:justify-between"
+      style={{ backgroundColor, borderColor: color }}
+    >
+      <div className="flex items-center gap-2.5 font-medium" style={{ color }}>
+        <Icon size={17} />
+        <span className="text-sm">{label}</span>
+      </div>
+      <span className="text-xs font-semibold sm:text-right" style={{ color }}>
+        {detail}
+      </span>
+    </div>
+  );
+}
+
+function DockerSummary({ containers }: { containers: ContainerSummary[] }) {
   const running = containers.filter(c => c.state === "running").length;
   const stopped = containers.filter(c => c.state !== "running").length;
   const total = containers.length;
@@ -188,6 +228,7 @@ function DockerSummary() {
 
 export default function Dashboard() {
   const { stats, formatted, history } = useSystemStats();
+  const containers = useContainers();
   const queryClient = useQueryClient();
   const addToast = useStore((s) => s.addToast);
 
@@ -251,6 +292,11 @@ export default function Dashboard() {
       
       {/* Left Column: Main Content */}
       <div className="flex-1 min-w-0 space-y-6">
+        <DashboardStatusBanner
+          containers={containers}
+          uptime={formatted?.uptime}
+          hasStats={Boolean(stats)}
+        />
         
         {/* Search & Actions */}
         <div className="flex gap-3">
@@ -349,7 +395,7 @@ export default function Dashboard() {
           />
         </div>
 
-        <DockerSummary />
+        <DockerSummary containers={containers} />
 
         <OperationsTimeline />
       </div>

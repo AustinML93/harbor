@@ -4,32 +4,43 @@ This document tracks upcoming features and architectural improvements for Harbor
 
 ## Up Next
 
-1. **Public Launch Polish**
+1. **Dashboard Orientation And Service Tile Polish**
+   - Add a top dashboard status banner that answers "is everything OK?":
+     all containers running, issue count, stale data, recent alerts, and uptime.
+   - Tighten the service tile layout based on the Magic Patterns exploration:
+     keep the grid around 3-4 useful columns on desktop, show category counts, make tiles clearly clickable, and keep the external-link affordance visible but subtle.
+   - Hold off on port badges for now; port details may fit better in a hover state, detail view, or another lightweight info surface later.
+   - Keep service tiles launch-focused for now:
+     do not add container status dots, restart/log quick actions, or other container controls until service-to-container mapping is intentionally designed.
+
+2. **Public Launch Polish**
    - Capture README/GitHub screenshots:
      dashboard, container sparklines, resource trend deep dive, and settings/alerts.
    - Draft a short OMV forum post with setup expectations, Docker socket notes, and current limitations.
    - Gather first-pass feedback before adding broader Docker management features.
 
-2. **Operations Visibility Polish**
+3. **Operations Visibility Polish**
    - Add a "What needs attention?" dashboard summary for down containers, recent alerts, hot containers, and stale data.
    - Expand the activity timeline with richer event types.
    - Surface recent failures, restart history, unhealthy containers, and recovery events clearly.
    - Consider a dedicated Activity page once dashboard timeline density becomes limiting.
 
-3. **Resource Insight Polish**
+4. **Resource Insight Polish**
    - Extend top resource users beyond current samples:
      top CPU/RAM over the last 24h and recent peak usage.
    - Add lightweight anomaly hints such as "higher than usual" or "memory rising" from recent averages.
    - Make empty/loading states explicit:
      resource trends appear after Harbor has collected a few 60s samples.
+   - Revisit metric card context while polishing the dashboard:
+     RAM/disk absolute values and capacity subtitles are useful when they do not make the cards feel crowded.
 
-4. **Container Detail Experience**
+5. **Container Detail Experience**
    - Grow the resource deep-dive into a fuller container detail drawer/page.
    - Candidate tabs:
      Overview, Resources, Logs, Events, and Alerts.
    - Keep the experience read-oriented and operational; avoid broad orchestration controls in this pass.
 
-5. **First-Run And Reliability UX**
+6. **First-Run And Reliability UX**
    - Add a first-run checklist:
      password changed, Docker socket connected, `services.yml` writable, first resource sample collected, alerts configured.
    - Add status confidence indicators:

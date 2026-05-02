@@ -10,6 +10,10 @@ This document captures product direction, feature ideas, and positioning notes t
 
 ## Near-Term Bets
 
+- Dashboard orientation:
+  make the first screen quickly answer "is everything OK?" with a calm status banner, useful whitespace, and a service-launch area that feels intentional rather than crowded.
+- Service tile polish:
+  keep service cards focused on launching web UIs, with clear click affordance, category counts, and a 3-4 column desktop layout that reduces blank space without becoming noisy. Port details are potentially useful, but probably belong in a hover state, detail view, or other secondary surface instead of always-on badges.
 - Health summary:
   make the dashboard answer "what needs attention?" with down containers, recent alerts, hot containers, stale data, and other operational signals.
 - Resource attribution over time:
@@ -62,6 +66,7 @@ This document captures product direction, feature ideas, and positioning notes t
 ## Strategic Cautions
 
 - Avoid drifting too quickly into “generic Docker admin panel.”
+- Avoid making dashboard service tiles too busy. Container health dots, restart/log actions, and deeper operational controls belong on the Containers screen or a designed container detail experience unless Harbor gains a clear service-to-container mapping.
 - Multi-host support is promising, but it should come after the single-host experience feels excellent.
 - Full Portainer-style management is not a near-term goal. Compose-aware workflows may still make sense later if they feel guided, opinionated, and aligned with Harbor as a homelab command center.
 

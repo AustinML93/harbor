@@ -14,7 +14,7 @@ export function ServiceTile({ service, onEdit, onDelete }: Props) {
 
   return (
     <div
-      className="harbor-card group relative px-4 py-3 hover-lift"
+      className="harbor-card group relative cursor-pointer px-4 py-3.5 hover-lift"
       onMouseEnter={(e) => {
         (e.currentTarget as HTMLElement).style.borderColor = "var(--color-accent)";
       }}
@@ -27,7 +27,7 @@ export function ServiceTile({ service, onEdit, onDelete }: Props) {
         href={service.url}
         target="_blank"
         rel="noopener noreferrer"
-        className="flex items-center gap-3"
+        className="flex items-center gap-3 pr-7"
       >
         <div className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-lg transition-transform duration-150 group-hover:scale-105">
           <ServiceIcon key={service.icon} slug={service.icon} name={service.name} url={service.url} size={28} />
@@ -42,7 +42,7 @@ export function ServiceTile({ service, onEdit, onDelete }: Props) {
             </span>
             <ExternalLink
               size={11}
-              className="flex-shrink-0 opacity-0 transition-opacity group-hover:opacity-60"
+              className="flex-shrink-0 opacity-40 transition-opacity group-hover:opacity-80"
               style={{ color: "var(--color-muted)" }}
             />
           </div>
@@ -58,13 +58,14 @@ export function ServiceTile({ service, onEdit, onDelete }: Props) {
       </a>
 
       {/* Context menu */}
-      <div className="absolute right-2 top-1/2 -translate-y-1/2">
+      <div className="absolute right-2 top-2">
         <button
+          aria-label={`More actions for ${service.name}`}
           onClick={(e) => {
             e.stopPropagation();
             setMenuOpen((v) => !v);
           }}
-          className="rounded p-1 opacity-0 transition-opacity group-hover:opacity-100"
+          className={`rounded p-1 transition-opacity ${menuOpen ? "opacity-100" : "opacity-0 group-hover:opacity-100"}`}
           style={{ color: "var(--color-muted)" }}
           onMouseEnter={(e) =>
             ((e.currentTarget as HTMLElement).style.backgroundColor = "var(--color-border)")
