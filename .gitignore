@@ -11,6 +11,9 @@
 # Services config (user-specific, not committed)
 services.yml
 
+# Local design exploration drop zone (Magic Patterns, Google Stitch, etc.)
+design/
+
 # =============================================================================
 # Python
 # =============================================================================

@@ -4,6 +4,8 @@ This document tracks upcoming features and architectural improvements for Harbor
 
 ## Up Next
 
+Start next session by reviewing first-pass OMV/forum feedback if available. If there is no feedback yet, continue with **Operations Visibility Polish** before opening larger product bets.
+
 1. **Public Launch Polish**
    - Gather first-pass feedback before adding broader Docker management features.
    - Refresh README/GitHub screenshots after meaningful UI changes using `npm run screenshots`.
