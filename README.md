@@ -19,14 +19,17 @@ It's designed to be dead simple to deploy (`docker compose up -d`), opinionated 
 
 ## Screenshots
 
-Screenshots are coming next. The README is ready for these image slots once captures are added under `docs/screenshots/`:
+Harbor is designed to be useful at a glance: launch services, watch server health, scan recent activity, and drill into container resource trends when something looks off.
 
-| View | Planned image |
-|------|---------------|
-| Dashboard and service launcher | `docs/screenshots/dashboard.png` |
-| Container list with resource sparklines | `docs/screenshots/containers.png` |
-| Container resource trend deep dive | `docs/screenshots/container-resource-trends.png` |
-| Settings and alert rules | `docs/screenshots/settings.png` |
+These images use sanitized demo data and can be regenerated from the frontend with `npm run screenshots`.
+
+| Dashboard and service launcher | Container list with resource sparklines |
+|---|---|
+| ![Dashboard and service launcher](docs/screenshots/dashboard.png) | ![Container list with resource sparklines](docs/screenshots/containers.png) |
+
+| Container resource trend deep dive | Settings and alert rules |
+|---|---|
+| ![Container resource trend deep dive](docs/screenshots/container-resource-trends.png) | ![Settings and alert rules](docs/screenshots/settings.png) |
 
 ---
 
@@ -219,8 +222,8 @@ Harbor is being built in phases. Here's where things stand:
 
 ### Phase 3 — Command Center Polish (Up Next)
 
-- Richer activity history for failures, recoveries, and restarts
 - Public launch polish: screenshots, demo notes, and first-pass forum feedback
+- Richer "what needs attention?" signals for failures, recoveries, stale data, and hot containers
 
 ### Future / considering
 

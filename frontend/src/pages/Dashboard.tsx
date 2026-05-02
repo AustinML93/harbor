@@ -4,9 +4,10 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 
 import { useSystemStats } from "../hooks/useSystemStats";
 import { useContainers } from "../hooks/useContainers";
+import { useRecentContainerStats } from "../hooks/useContainerStats";
 import { useStore } from "../store";
 import api from "../lib/api";
-import type { ServiceItem } from "../types";
+import type { ContainerRecentStat, ServiceItem } from "../types";
 
 import { StatCard } from "../components/dashboard/StatCard";
 import { ServiceGrid } from "../components/services/ServiceGrid";
@@ -155,26 +156,50 @@ function DashboardStatusBanner({
   containers,
   uptime,
   hasStats,
+  wsConnected,
+  problemEvents,
+  recentStats,
 }: {
   containers: ContainerSummary[];
   uptime?: string;
   hasStats: boolean;
+  wsConnected: boolean;
+  problemEvents: OperationEvent[];
+  recentStats: ContainerRecentStat[];
 }) {
   const total = containers.length;
   const issueCount = containers.filter((c) => c.state !== "running").length;
-  const hasIssues = issueCount > 0;
+  const recentProblemCount = problemEvents.length;
+  const hotContainers = recentStats.filter(
+    (stat) => stat.cpu_percent >= 80 || stat.memory_percent >= 85
+  );
+  const hotCount = hotContainers.length;
   const waitingForLiveData = !hasStats || total === 0;
-  const Icon = hasIssues || waitingForLiveData ? AlertTriangle : CheckCircle2;
+  const staleData = hasStats && !wsConnected;
+  const needsAttention = issueCount > 0 || recentProblemCount > 0 || hotCount > 0 || staleData;
+  const Icon = needsAttention || waitingForLiveData ? AlertTriangle : CheckCircle2;
 
   const label = waitingForLiveData
     ? "Waiting for live status"
-    : hasIssues
+    : staleData
+    ? "Live connection interrupted"
+    : issueCount > 0
     ? `${issueCount} container${issueCount === 1 ? "" : "s"} need attention`
+    : recentProblemCount > 0
+    ? `${recentProblemCount} recent issue${recentProblemCount === 1 ? "" : "s"} need review`
+    : hotCount > 0
+    ? `${hotCount} hot container${hotCount === 1 ? "" : "s"}`
     : `All ${total} container${total === 1 ? "" : "s"} running`;
 
-  const detail = uptime ? `Uptime ${uptime}` : "Live telemetry";
-  const color = hasIssues || waitingForLiveData ? "var(--color-warning)" : "var(--color-success)";
-  const backgroundColor = hasIssues || waitingForLiveData ? "var(--color-warning-dim)" : "var(--color-success-dim)";
+  const detailItems = [
+    issueCount > 0 ? `${issueCount} down` : null,
+    recentProblemCount > 0 ? `${recentProblemCount} recent issue${recentProblemCount === 1 ? "" : "s"}` : null,
+    hotCount > 0 ? `${hotCount} hot` : null,
+    uptime ? `Uptime ${uptime}` : "Live telemetry",
+  ].filter(Boolean);
+  const detail = detailItems.join(" · ");
+  const color = needsAttention || waitingForLiveData ? "var(--color-warning)" : "var(--color-success)";
+  const backgroundColor = needsAttention || waitingForLiveData ? "var(--color-warning-dim)" : "var(--color-success-dim)";
 
   return (
     <div
@@ -227,6 +252,7 @@ function DockerSummary({ containers }: { containers: ContainerSummary[] }) {
 export default function Dashboard() {
   const { stats, formatted, history } = useSystemStats();
   const containers = useContainers();
+  const wsConnected = useStore((s) => s.wsConnected);
   const queryClient = useQueryClient();
   const addToast = useStore((s) => s.addToast);
 
@@ -239,6 +265,17 @@ export default function Dashboard() {
     queryKey: ["services"],
     queryFn: () => api.get("/services").then((r) => r.data),
   });
+  const { data: problemEvents = [] } = useQuery<OperationEvent[]>({
+    queryKey: ["operations-timeline", "dashboard-problems"],
+    queryFn: () => {
+      const params = new URLSearchParams({ limit: "20" });
+      params.append("severity", "danger");
+      params.append("severity", "warning");
+      return api.get(`/operations/timeline?${params.toString()}`).then((r) => r.data);
+    },
+    refetchInterval: 30000,
+  });
+  const { data: recentStats = [] } = useRecentContainerStats(25);
 
   const saveMutation = useMutation({
     mutationFn: (updated: ServiceItem[]) => api.put("/services", { services: updated }),
@@ -294,6 +331,9 @@ export default function Dashboard() {
           containers={containers}
           uptime={formatted?.uptime}
           hasStats={Boolean(stats)}
+          wsConnected={wsConnected}
+          problemEvents={problemEvents}
+          recentStats={recentStats}
         />
         
         {/* Search & Actions */}

@@ -56,10 +56,14 @@ This document captures product direction, feature ideas, and positioning notes t
 
 ## Completed Directional Bets
 
+- Dashboard orientation:
+  Harbor now has a calmer dashboard layout, status banner, service tile category counts, and public/demo screenshots for evaluating the first impression.
 - Per-container resource history:
   Harbor now collects CPU/RAM samples over time, shows table sparklines, highlights top resource users, and provides a 24h resource trend deep dive.
 - Operations timeline:
   dashboard now combines container lifecycle transitions, alerts, and recoveries into a useful activity stream.
+- Operations attention summary:
+  the dashboard now calls out down containers, recent issues, hot containers, stale live data, and uptime in the top status banner.
 - Recovery notifications:
   Harbor now records and sends a recovery event after a down alert when the container comes back up.
 

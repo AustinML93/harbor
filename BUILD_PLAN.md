@@ -226,7 +226,7 @@ Attribute host resource usage to individual containers over time.
 - `[x]` `docker-compose.yml` health checks on both services
 - `[x]` `docker-compose.yml` restart policies
 - `[x]` README quickstart and env var documentation
-- `[ ]` README screenshots
+- `[x]` README screenshots
 
 ---
 

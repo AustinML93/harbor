@@ -5,13 +5,11 @@ This document tracks upcoming features and architectural improvements for Harbor
 ## Up Next
 
 1. **Public Launch Polish**
-   - Capture README/GitHub screenshots:
-     dashboard, container sparklines, resource trend deep dive, and settings/alerts.
-   - Draft a short OMV forum post with setup expectations, Docker socket notes, and current limitations.
    - Gather first-pass feedback before adding broader Docker management features.
+   - Refresh README/GitHub screenshots after meaningful UI changes using `npm run screenshots`.
+   - Iterate the OMV forum post draft after feedback from real OMV/self-hosted users.
 
 2. **Operations Visibility Polish**
-   - Add a "What needs attention?" dashboard summary for down containers, recent alerts, hot containers, and stale data.
    - Expand the activity timeline with richer event types.
    - Surface recent failures, restart history, unhealthy containers, and recovery events clearly.
    - Consider a dedicated Activity page once dashboard timeline density becomes limiting.
@@ -39,6 +37,10 @@ This document tracks upcoming features and architectural improvements for Harbor
    - Consider a demo mode or seed script for GitHub screenshots and forum evaluation.
 
 ## Recently Completed
+- Public launch assets:
+  sanitized README screenshots for dashboard, container sparklines, resource trends, and settings/alerts; repeatable Playwright capture script; and a draft OMV forum post.
+- Operations attention summary:
+  dashboard banner now calls out down containers, recent warning/danger events, hot containers, stale live data, and uptime.
 - Dashboard orientation and service tile polish:
   status banner, 3-4 column service grid, category counts, subtle external-link affordance, quieter System Health hover behavior, and no service-tile port badges/status dots/quick actions.
 - Frontend per-container resource views:

@@ -7,7 +7,8 @@
     "dev": "vite",
     "build": "tsc && vite build",
     "preview": "vite preview",
-    "lint": "eslint src --ext ts,tsx --report-unused-disable-directives --max-warnings 0"
+    "lint": "eslint src --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
+    "screenshots": "node scripts/capture-readme-screenshots.cjs"
   },
   "dependencies": {
     "@tanstack/react-query": "^5.62.3",
