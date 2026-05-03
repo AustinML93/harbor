@@ -40,6 +40,13 @@ function formatTime(value: string) {
   return new Date(value).toLocaleTimeString(undefined, { hour: "numeric", minute: "2-digit" });
 }
 
+function formatSampleSummary(count: number, latestTimestamp?: string) {
+  if (count === 0) return "Collecting resource history";
+  const latest = latestTimestamp ? formatTime(latestTimestamp) : null;
+  const sampleLabel = count === 1 ? "1 sample" : `${count} samples`;
+  return latest ? `Last 24 hours · ${sampleLabel} · latest ${latest}` : `Last 24 hours · ${sampleLabel}`;
+}
+
 function MetricTile({
   label,
   value,
@@ -68,6 +75,8 @@ function MetricTile({
 
 export function ContainerResourceModal({ container, history, loading }: Props) {
   const latest = history[history.length - 1];
+  const hasSamples = history.length > 0;
+  const hasTrend = history.length > 1;
   const cpuValues = history.map((point) => point.cpu_percent);
   const memoryValues = history.map((point) => point.memory_percent);
   const peakCpu = Math.max(0, ...cpuValues);
@@ -87,7 +96,7 @@ export function ContainerResourceModal({ container, history, loading }: Props) {
             {container.image}
           </p>
           <p className="mt-1 text-xs" style={{ color: "var(--color-muted)" }}>
-            Last 24 hours · {history.length} samples
+            {formatSampleSummary(history.length, latest?.timestamp)}
           </p>
         </div>
       </div>
@@ -101,7 +110,7 @@ export function ContainerResourceModal({ container, history, loading }: Props) {
         />
         <MetricTile
           label="CPU peak"
-          value={`${peakCpu.toFixed(peakCpu >= 10 ? 0 : 1)}%`}
+          value={hasSamples ? `${peakCpu.toFixed(peakCpu >= 10 ? 0 : 1)}%` : "—"}
           icon={<Cpu size={15} />}
           accent="var(--color-accent)"
         />
@@ -113,7 +122,7 @@ export function ContainerResourceModal({ container, history, loading }: Props) {
         />
         <MetricTile
           label="Memory peak"
-          value={`${peakMemory.toFixed(peakMemory >= 10 ? 0 : 1)}%`}
+          value={hasSamples ? `${peakMemory.toFixed(peakMemory >= 10 ? 0 : 1)}%` : "—"}
           icon={<HardDrive size={15} />}
           accent="var(--color-warning)"
         />
@@ -125,7 +134,7 @@ export function ContainerResourceModal({ container, history, loading }: Props) {
       >
         {loading ? (
           <div className="h-full w-full animate-pulse rounded" style={{ backgroundColor: "var(--color-border)" }} />
-        ) : chartData.length > 1 ? (
+        ) : hasTrend ? (
           <ResponsiveContainer width="100%" height="100%">
             <LineChart data={chartData} margin={{ top: 8, right: 10, bottom: 0, left: -18 }}>
               <CartesianGrid stroke="var(--color-border)" vertical={false} />
@@ -178,8 +187,12 @@ export function ContainerResourceModal({ container, history, loading }: Props) {
             </LineChart>
           </ResponsiveContainer>
         ) : (
-          <div className="flex h-full items-center justify-center text-sm" style={{ color: "var(--color-muted)" }}>
-            Trends will appear after Harbor collects more samples.
+          <div
+            className="flex h-full flex-col items-center justify-center gap-1 text-center text-sm"
+            style={{ color: "var(--color-muted)" }}
+          >
+            <p>{hasSamples ? "One sample collected." : "No resource samples yet."}</p>
+            <p className="text-xs">Trends appear after Harbor collects a few 60s samples.</p>
           </div>
         )}
       </div>
@@ -187,13 +200,13 @@ export function ContainerResourceModal({ container, history, loading }: Props) {
       <div className="grid gap-3 sm:grid-cols-3">
         <MetricTile
           label="CPU avg"
-          value={`${average(cpuValues).toFixed(average(cpuValues) >= 10 ? 0 : 1)}%`}
+          value={hasSamples ? `${average(cpuValues).toFixed(average(cpuValues) >= 10 ? 0 : 1)}%` : "—"}
           icon={<Cpu size={15} />}
           accent="var(--color-accent)"
         />
         <MetricTile
           label="Memory avg"
-          value={`${average(memoryValues).toFixed(average(memoryValues) >= 10 ? 0 : 1)}%`}
+          value={hasSamples ? `${average(memoryValues).toFixed(average(memoryValues) >= 10 ? 0 : 1)}%` : "—"}
           icon={<MemoryStick size={15} />}
           accent="var(--color-warning)"
         />

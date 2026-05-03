@@ -46,7 +46,7 @@ export function ResourceSparkline({ data, dataKey, color, label, latest, loading
           </ResponsiveContainer>
         ) : (
           <div className="flex h-full items-center justify-center text-[10px]" style={{ color: "var(--color-muted)" }}>
-            No trend
+            {data.length === 1 ? "1 sample" : "Collecting"}
           </div>
         )}
       </div>

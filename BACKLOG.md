@@ -18,8 +18,6 @@ Start next session by reviewing first-pass OMV/forum feedback if available. If t
 
 3. **Resource Insight Polish**
    - Add lightweight anomaly hints such as "higher than usual" or "memory rising" from recent averages.
-   - Make empty/loading states explicit:
-     resource trends appear after Harbor has collected a few 60s samples.
    - Revisit metric card context while polishing the dashboard:
      RAM/disk absolute values and capacity subtitles are useful when they do not make the cards feel crowded.
 
@@ -37,6 +35,8 @@ Start next session by reviewing first-pass OMV/forum feedback if available. If t
    - Consider a demo mode or seed script for GitHub screenshots and forum evaluation.
 
 ## Recently Completed
+- Resource insight empty/loading polish:
+  top users, table sparklines, and container trend details now explain when Harbor is still collecting 60s samples.
 - Top resource users now ranks containers by peak CPU/RAM over the last 24h, with average usage context.
 - Public launch assets:
   sanitized README screenshots for dashboard, container sparklines, resource trends, and settings/alerts; repeatable Playwright capture script; and a draft OMV forum post.
