@@ -188,8 +188,10 @@ Attribute host resource usage to individual containers over time.
 - `[x]` Retention policy — prune old rows to a bounded window
 - `[x]` `GET /api/containers/{id}/stats/history` — per-container history endpoint
 - `[x]` `GET /api/containers/stats/recent` — compact recent stats for table/dashboard sparklines
+- `[x]` `GET /api/containers/stats/top` — 24h aggregate top CPU/RAM users with peak and average values
 - `[x]` Frontend: CPU/RAM sparklines in container list/cards
 - `[x]` Frontend: container detail resource trend view
+- `[x]` Frontend: top resource users over the last 24h
 - `[x]` Tests for stat normalization and retention pruning
 
 ### Acceptance Criteria
@@ -204,6 +206,7 @@ Attribute host resource usage to individual containers over time.
 ### UI/UX
 - `[ ]` Skeleton loaders for all data-loading states
 - `[x]` Empty states with helpful messages (no containers, no services)
+- `[x]` Resource insight empty/loading states for fresh resource-history windows
 - `[x]` Toast notifications for action results (container started, error, etc.)
 - `[ ]` Error boundaries with friendly fallback UI
 - `[x]` Mobile responsive layout (sidebar collapses to bottom nav on mobile)

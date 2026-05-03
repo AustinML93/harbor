@@ -56,6 +56,24 @@ const recentStats = containers.map((container, index) => ({
   block_write_bytes: 2000000 + index * 800000,
 }));
 
+const topStats = containers.map((container, index) => {
+  const peakCpu = index === 1 ? 83.2 : 18 + index * 5.4;
+  const peakMemory = index === 1 ? 88.4 : 24 + index * 4.9;
+  return {
+    container_id: container.id,
+    container_name: container.name,
+    sample_count: 24,
+    first_sample_at: new Date(now - 24 * 3600000).toISOString(),
+    last_sample_at: new Date(now - index * 60000).toISOString(),
+    avg_cpu_percent: Math.max(2, peakCpu * 0.42),
+    peak_cpu_percent: peakCpu,
+    avg_memory_percent: Math.max(8, peakMemory * 0.68),
+    peak_memory_percent: peakMemory,
+    latest_memory_usage_bytes: recentStats[index].memory_usage_bytes,
+    latest_memory_limit_bytes: recentStats[index].memory_limit_bytes,
+  };
+});
+
 function historyFor(containerId, hours = 24) {
   return Array.from({ length: 24 }, (_, i) => {
     const base = Number(containerId) * 2;
@@ -163,6 +181,7 @@ async function installMocks(page) {
   }));
   await page.route("**/api/operations/timeline?**", (route) => route.fulfill({ json: filteredTimeline(route.request().url()) }));
   await page.route("**/api/containers/stats/recent?**", (route) => route.fulfill({ json: recentStats }));
+  await page.route("**/api/containers/stats/top?**", (route) => route.fulfill({ json: topStats }));
   await page.route("**/api/containers/*/stats/history?**", (route) => {
     const match = route.request().url().match(/\/api\/containers\/([^/]+)\/stats\/history/);
     route.fulfill({ json: historyFor(match?.[1] ?? "1", 24) });

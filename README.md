@@ -19,7 +19,7 @@ It's designed to be dead simple to deploy (`docker compose up -d`), opinionated 
 
 ## Screenshots
 
-Harbor is designed to be useful at a glance: launch services, watch server health, scan recent activity, and drill into container resource trends when something looks off.
+Harbor is designed to be useful at a glance: launch services, watch server health, scan recent activity, spot the top CPU/RAM users over the last 24 hours, and drill into container resource trends when something looks off.
 
 These images use sanitized demo data and can be regenerated from the frontend with `npm run screenshots`.
 
@@ -215,7 +215,8 @@ Harbor is being built in phases. Here's where things stand:
 - [x] Per-container resource history backend (CPU/RAM samples and history endpoints)
 - [x] Per-container CPU and RAM sparklines
 - [x] Container detail resource trend views
-- [x] Top container resource users summary
+- [x] Top container resource users over the last 24h with peak and average usage
+- [x] Resource insight empty/loading states for fresh installs and sparse sample windows
 - [x] Container down alerts with webhook delivery (Slack, ntfy, Gotify, etc.)
 - [x] Notification rule management UI
 - [x] Alert history log

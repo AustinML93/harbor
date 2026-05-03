@@ -59,7 +59,7 @@ This document captures product direction, feature ideas, and positioning notes t
 - Dashboard orientation:
   Harbor now has a calmer dashboard layout, status banner, service tile category counts, and public/demo screenshots for evaluating the first impression.
 - Per-container resource history:
-  Harbor now collects CPU/RAM samples over time, shows table sparklines, highlights top resource users, and provides a 24h resource trend deep dive.
+  Harbor now collects CPU/RAM samples over time, shows table sparklines, ranks top CPU/RAM users by 24h peak usage with average context, and provides a 24h resource trend deep dive with explicit sparse-data states.
 - Operations timeline:
   dashboard now combines container lifecycle transitions, alerts, and recoveries into a useful activity stream.
 - Operations attention summary:
