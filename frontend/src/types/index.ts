@@ -71,6 +71,20 @@ export interface ContainerStatPoint {
 
 export type ContainerRecentStat = ContainerStatPoint;
 
+export interface ContainerTopStat {
+  container_id: string;
+  container_name: string;
+  sample_count: number;
+  first_sample_at: string;
+  last_sample_at: string;
+  avg_cpu_percent: number;
+  peak_cpu_percent: number;
+  avg_memory_percent: number;
+  peak_memory_percent: number;
+  latest_memory_usage_bytes: number;
+  latest_memory_limit_bytes: number;
+}
+
 export type ContainerAction = "start" | "stop" | "restart";
 
 export interface ServiceItem {

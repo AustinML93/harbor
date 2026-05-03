@@ -1,6 +1,11 @@
 import { useMemo, useState } from "react";
 import { useContainers, useContainerAction, useContainerDelete } from "../hooks/useContainers";
-import { useContainerStatsHistories, useContainerStatsHistory, useRecentContainerStats } from "../hooks/useContainerStats";
+import {
+  useContainerStatsHistories,
+  useContainerStatsHistory,
+  useRecentContainerStats,
+  useTopContainerStats,
+} from "../hooks/useContainerStats";
 import api from "../lib/api";
 import { ContainerTable } from "../components/containers/ContainerTable";
 import { ContainerResourceModal } from "../components/containers/ContainerResourceModal";
@@ -12,7 +17,8 @@ export default function Containers() {
   const containers = useContainers();
   const { mutate: runAction, isPending } = useContainerAction();
   const { mutate: deleteContainer, isPending: isDeleting } = useContainerDelete();
-  const { data: recentStats = [], isLoading: recentStatsLoading } = useRecentContainerStats(50);
+  const { data: recentStats = [] } = useRecentContainerStats(50);
+  const { data: topStats = [], isLoading: topStatsLoading } = useTopContainerStats(24, 10);
 
   const [logContainerId, setLogContainerId] = useState<string | null>(null);
   const [logs, setLogs] = useState<string[]>([]);
@@ -81,7 +87,7 @@ export default function Containers() {
         </p>
       </div>
 
-      <ResourceUsageSummary stats={recentStats} loading={recentStatsLoading} />
+      <ResourceUsageSummary stats={topStats} loading={topStatsLoading} />
 
       <ContainerTable
         containers={containers}

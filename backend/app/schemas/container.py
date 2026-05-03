@@ -48,3 +48,17 @@ class ContainerStatPoint(BaseModel):
 
 class ContainerRecentStat(ContainerStatPoint):
     pass
+
+
+class ContainerTopStat(BaseModel):
+    container_id: str
+    container_name: str
+    sample_count: int
+    first_sample_at: datetime
+    last_sample_at: datetime
+    avg_cpu_percent: float
+    peak_cpu_percent: float
+    avg_memory_percent: float
+    peak_memory_percent: float
+    latest_memory_usage_bytes: int
+    latest_memory_limit_bytes: int

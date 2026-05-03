@@ -6,6 +6,7 @@ from app.schemas.container import (
     ContainerRecentStat,
     ContainerStatPoint,
     ContainerSummary,
+    ContainerTopStat,
 )
 from app.services.docker_service import docker_service
 
@@ -25,6 +26,16 @@ async def get_recent_container_stats(
 ):
     """Return the latest resource sample for each recently observed container."""
     return docker_service.get_recent_container_stats(limit=limit)
+
+
+@router.get("/stats/top", response_model=list[ContainerTopStat])
+async def get_top_container_stats(
+    hours: int = Query(default=24, ge=1, le=168),
+    limit: int = Query(default=10, ge=1, le=50),
+    _: str = Depends(get_current_user),
+):
+    """Return top container resource users over a recent time window."""
+    return docker_service.get_top_container_stats(hours=hours, limit=limit)
 
 
 @router.get("/{container_id}/stats/history", response_model=list[ContainerStatPoint])

@@ -1,12 +1,23 @@
 import { useQueries, useQuery } from "@tanstack/react-query";
 import api from "../lib/api";
-import type { ContainerRecentStat, ContainerStatPoint } from "../types";
+import type { ContainerRecentStat, ContainerStatPoint, ContainerTopStat } from "../types";
 
 export function useRecentContainerStats(limit = 50) {
   return useQuery<ContainerRecentStat[]>({
     queryKey: ["container-stats-recent", limit],
     queryFn: () =>
       api.get(`/containers/stats/recent?limit=${limit}`).then((response) => response.data),
+    refetchInterval: 60000,
+  });
+}
+
+export function useTopContainerStats(hours = 24, limit = 10) {
+  return useQuery<ContainerTopStat[]>({
+    queryKey: ["container-stats-top", hours, limit],
+    queryFn: () =>
+      api
+        .get(`/containers/stats/top?hours=${hours}&limit=${limit}`)
+        .then((response) => response.data),
     refetchInterval: 60000,
   });
 }

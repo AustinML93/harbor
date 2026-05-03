@@ -150,6 +150,65 @@ class ContainerStatsTests(unittest.TestCase):
         self.assertEqual(result[0].cpu_percent, 12)
         self.assertEqual(result[0].memory_percent, 20)
 
+    def test_top_container_stats_returns_24h_aggregates(self) -> None:
+        now = datetime.now(timezone.utc).replace(tzinfo=None)
+        with self.session_factory() as db:
+            db.add_all(
+                [
+                    ContainerStat(
+                        timestamp=now - timedelta(hours=25),
+                        container_id="old-container",
+                        container_name="Old Container",
+                        cpu_percent=99,
+                        memory_usage_bytes=900,
+                        memory_limit_bytes=1000,
+                        memory_percent=90,
+                    ),
+                    ContainerStat(
+                        timestamp=now - timedelta(minutes=10),
+                        container_id="container-123",
+                        container_name="Harbor Test",
+                        cpu_percent=10,
+                        memory_usage_bytes=100,
+                        memory_limit_bytes=1000,
+                        memory_percent=10,
+                    ),
+                    ContainerStat(
+                        timestamp=now,
+                        container_id="container-123",
+                        container_name="Harbor Test",
+                        cpu_percent=30,
+                        memory_usage_bytes=200,
+                        memory_limit_bytes=1000,
+                        memory_percent=20,
+                    ),
+                    ContainerStat(
+                        timestamp=now,
+                        container_id="container-456",
+                        container_name="Busy Worker",
+                        cpu_percent=50,
+                        memory_usage_bytes=300,
+                        memory_limit_bytes=1000,
+                        memory_percent=30,
+                    ),
+                ]
+            )
+            db.commit()
+
+        service = DockerService()
+        with patch("app.core.database.SessionLocal", self.session_factory):
+            result = service.get_top_container_stats(hours=24, limit=10)
+
+        self.assertEqual(len(result), 2)
+        self.assertEqual(result[0].container_name, "Busy Worker")
+        self.assertEqual(result[1].container_name, "Harbor Test")
+        self.assertEqual(result[1].sample_count, 2)
+        self.assertEqual(result[1].avg_cpu_percent, 20)
+        self.assertEqual(result[1].peak_cpu_percent, 30)
+        self.assertEqual(result[1].avg_memory_percent, 15)
+        self.assertEqual(result[1].peak_memory_percent, 20)
+        self.assertEqual(result[1].latest_memory_usage_bytes, 200)
+
 
 if __name__ == "__main__":
     unittest.main()

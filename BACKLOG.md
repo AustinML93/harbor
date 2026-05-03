@@ -17,8 +17,6 @@ Start next session by reviewing first-pass OMV/forum feedback if available. If t
    - Consider a dedicated Activity page once dashboard timeline density becomes limiting.
 
 3. **Resource Insight Polish**
-   - Extend top resource users beyond current samples:
-     top CPU/RAM over the last 24h and recent peak usage.
    - Add lightweight anomaly hints such as "higher than usual" or "memory rising" from recent averages.
    - Make empty/loading states explicit:
      resource trends appear after Harbor has collected a few 60s samples.
@@ -39,6 +37,7 @@ Start next session by reviewing first-pass OMV/forum feedback if available. If t
    - Consider a demo mode or seed script for GitHub screenshots and forum evaluation.
 
 ## Recently Completed
+- Top resource users now ranks containers by peak CPU/RAM over the last 24h, with average usage context.
 - Public launch assets:
   sanitized README screenshots for dashboard, container sparklines, resource trends, and settings/alerts; repeatable Playwright capture script; and a draft OMV forum post.
 - Operations attention summary:

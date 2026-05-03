@@ -14,6 +14,7 @@ from app.schemas.container import (
     ContainerRecentStat,
     ContainerStatPoint,
     ContainerSummary,
+    ContainerTopStat,
     PortMapping,
 )
 
@@ -340,6 +341,79 @@ class DockerService:
             )
             return [
                 ContainerRecentStat.model_validate(record, from_attributes=True)
+                for record in records
+            ]
+        finally:
+            db.close()
+
+    def get_top_container_stats(self, hours: int = 24, limit: int = 10) -> list[ContainerTopStat]:
+        from datetime import timedelta
+
+        from sqlalchemy import func
+
+        from app.core.database import SessionLocal
+        from app.models.container_stat import ContainerStat
+
+        cutoff = datetime.utcnow() - timedelta(hours=hours)
+        db = SessionLocal()
+        try:
+            aggregate_rows = (
+                db.query(
+                    ContainerStat.container_id.label("container_id"),
+                    func.count(ContainerStat.id).label("sample_count"),
+                    func.min(ContainerStat.timestamp).label("first_sample_at"),
+                    func.max(ContainerStat.timestamp).label("last_sample_at"),
+                    func.avg(ContainerStat.cpu_percent).label("avg_cpu_percent"),
+                    func.max(ContainerStat.cpu_percent).label("peak_cpu_percent"),
+                    func.avg(ContainerStat.memory_percent).label("avg_memory_percent"),
+                    func.max(ContainerStat.memory_percent).label("peak_memory_percent"),
+                )
+                .filter(ContainerStat.timestamp >= cutoff)
+                .group_by(ContainerStat.container_id)
+                .subquery()
+            )
+            latest_rows = (
+                db.query(
+                    ContainerStat.container_id.label("container_id"),
+                    func.max(ContainerStat.timestamp).label("timestamp"),
+                )
+                .filter(ContainerStat.timestamp >= cutoff)
+                .group_by(ContainerStat.container_id)
+                .subquery()
+            )
+            records = (
+                db.query(ContainerStat, aggregate_rows)
+                .join(
+                    latest_rows,
+                    (ContainerStat.container_id == latest_rows.c.container_id)
+                    & (ContainerStat.timestamp == latest_rows.c.timestamp),
+                )
+                .join(
+                    aggregate_rows,
+                    ContainerStat.container_id == aggregate_rows.c.container_id,
+                )
+                .order_by(
+                    aggregate_rows.c.peak_cpu_percent.desc(),
+                    aggregate_rows.c.peak_memory_percent.desc(),
+                )
+                .limit(limit)
+                .all()
+            )
+
+            return [
+                ContainerTopStat(
+                    container_id=record.ContainerStat.container_id,
+                    container_name=record.ContainerStat.container_name,
+                    sample_count=record.sample_count,
+                    first_sample_at=record.first_sample_at,
+                    last_sample_at=record.last_sample_at,
+                    avg_cpu_percent=round(float(record.avg_cpu_percent or 0), 2),
+                    peak_cpu_percent=round(float(record.peak_cpu_percent or 0), 2),
+                    avg_memory_percent=round(float(record.avg_memory_percent or 0), 2),
+                    peak_memory_percent=round(float(record.peak_memory_percent or 0), 2),
+                    latest_memory_usage_bytes=record.ContainerStat.memory_usage_bytes,
+                    latest_memory_limit_bytes=record.ContainerStat.memory_limit_bytes,
+                )
                 for record in records
             ]
         finally:

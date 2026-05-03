@@ -1,8 +1,8 @@
 import { Cpu, MemoryStick } from "lucide-react";
-import type { ContainerRecentStat } from "../../types";
+import type { ContainerTopStat } from "../../types";
 
 interface Props {
-  stats: ContainerRecentStat[];
+  stats: ContainerTopStat[];
   loading?: boolean;
 }
 
@@ -25,12 +25,14 @@ function TopList({
   icon,
   stats,
   valueKey,
+  avgKey,
   accent,
 }: {
   title: string;
   icon: React.ReactNode;
-  stats: ContainerRecentStat[];
-  valueKey: "cpu_percent" | "memory_percent";
+  stats: ContainerTopStat[];
+  valueKey: "peak_cpu_percent" | "peak_memory_percent";
+  avgKey: "avg_cpu_percent" | "avg_memory_percent";
   accent: string;
 }) {
   const top = [...stats].sort((a, b) => b[valueKey] - a[valueKey]).slice(0, 3);
@@ -62,12 +64,19 @@ function TopList({
                   {item.container_name}
                 </p>
                 <p className="text-xs" style={{ color: "var(--color-muted)" }}>
-                  {valueKey === "memory_percent" ? formatBytes(item.memory_usage_bytes) : "Current CPU"}
+                  {valueKey === "peak_memory_percent"
+                    ? `${formatBytes(item.latest_memory_usage_bytes)} latest`
+                    : `${item.sample_count} samples`}
                 </p>
               </div>
-              <span className="font-mono text-sm font-semibold tabular-nums" style={{ color: accent }}>
-                {item[valueKey].toFixed(item[valueKey] >= 10 ? 0 : 1)}%
-              </span>
+              <div className="text-right">
+                <span className="font-mono text-sm font-semibold tabular-nums" style={{ color: accent }}>
+                  {item[valueKey].toFixed(item[valueKey] >= 10 ? 0 : 1)}%
+                </span>
+                <p className="text-xs tabular-nums" style={{ color: "var(--color-muted)" }}>
+                  avg {item[avgKey].toFixed(item[avgKey] >= 10 ? 0 : 1)}%
+                </p>
+              </div>
             </div>
           ))}
         </div>
@@ -85,7 +94,7 @@ export function ResourceUsageSummary({ stats, loading }: Props) {
             Top resource users
           </h2>
           <p className="text-xs" style={{ color: "var(--color-muted)" }}>
-            Latest container samples
+            Peak usage over the last 24 hours
           </p>
         </div>
         {loading && (
@@ -100,14 +109,16 @@ export function ResourceUsageSummary({ stats, loading }: Props) {
           title="CPU"
           icon={<Cpu size={15} />}
           stats={stats}
-          valueKey="cpu_percent"
+          valueKey="peak_cpu_percent"
+          avgKey="avg_cpu_percent"
           accent="var(--color-accent)"
         />
         <TopList
           title="Memory"
           icon={<MemoryStick size={15} />}
           stats={stats}
-          valueKey="memory_percent"
+          valueKey="peak_memory_percent"
+          avgKey="avg_memory_percent"
           accent="var(--color-warning)"
         />
       </div>
