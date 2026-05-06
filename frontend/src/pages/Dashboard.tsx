@@ -1,5 +1,5 @@
-import { useState, useMemo } from "react";
-import { Activity, AlertTriangle, Bell, CheckCircle2, Cpu, HardDrive, MemoryStick, Network, Plus, Search, Compass } from "lucide-react";
+import { useEffect, useState, useMemo } from "react";
+import { Activity, AlertTriangle, Bell, CheckCircle2, CircleDashed, Cpu, HardDrive, MemoryStick, Network, Plus, Search, Compass } from "lucide-react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 
 import { useSystemStats } from "../hooks/useSystemStats";
@@ -18,10 +18,15 @@ import type { ContainerSummary, OperationEvent } from "../types";
 
 type TimelineFilter = "all" | "problems" | "containers" | "notifications";
 
+interface NotificationRuleSummary {
+  id: number;
+  enabled: boolean;
+}
+
 const timelineFilters: { value: TimelineFilter; label: string }[] = [
   { value: "all", label: "All" },
   { value: "problems", label: "Issues" },
-  { value: "containers", label: "Containers" },
+  { value: "containers", label: "Docker" },
   { value: "notifications", label: "Alerts" },
 ];
 
@@ -95,11 +100,11 @@ function OperationsTimeline() {
               key={option.value}
               type="button"
               onClick={() => setFilter(option.value)}
-              className={`h-8 rounded-md px-2 text-xs font-medium ${
+              className={`h-8 min-w-0 rounded-md px-1 text-xs font-medium ${
                 active ? "timeline-filter-active" : "timeline-filter"
               }`}
             >
-              {option.label}
+              <span className="block truncate">{option.label}</span>
             </button>
           );
         })}
@@ -249,10 +254,119 @@ function DockerSummary({ containers }: { containers: ContainerSummary[] }) {
   );
 }
 
+function formatFreshness(timestamp: number | null, now: number) {
+  if (!timestamp) return "No sample yet";
+
+  const diffSeconds = Math.max(0, Math.floor((now - timestamp) / 1000));
+  if (diffSeconds < 5) return "Just now";
+  if (diffSeconds < 60) return `${diffSeconds}s ago`;
+  if (diffSeconds < 3600) return `${Math.floor(diffSeconds / 60)}m ago`;
+  return `${Math.floor(diffSeconds / 3600)}h ago`;
+}
+
+function confidenceTone(ok: boolean, waiting = false) {
+  if (ok) return { color: "var(--color-success)", backgroundColor: "var(--color-success-dim)" };
+  if (waiting) return { color: "var(--color-muted)", backgroundColor: "var(--color-border)" };
+  return { color: "var(--color-warning)", backgroundColor: "var(--color-warning-dim)" };
+}
+
+function StatusConfidence({
+  wsConnected,
+  lastStatsAt,
+  lastContainersAt,
+  historyCount,
+  activeRuleCount,
+  rulesLoading,
+  now,
+}: {
+  wsConnected: boolean;
+  lastStatsAt: number | null;
+  lastContainersAt: number | null;
+  historyCount: number;
+  activeRuleCount: number;
+  rulesLoading: boolean;
+  now: number;
+}) {
+  const statsAgeSeconds = lastStatsAt ? (now - lastStatsAt) / 1000 : null;
+  const containersAgeSeconds = lastContainersAt ? (now - lastContainersAt) / 1000 : null;
+  const statsFresh = statsAgeSeconds !== null && statsAgeSeconds < 10;
+  const containersFresh = containersAgeSeconds !== null && containersAgeSeconds < 15;
+  const historyReady = historyCount >= 2;
+
+  const checks = [
+    {
+      label: "WebSocket",
+      value: wsConnected ? "Connected" : "Disconnected",
+      ok: wsConnected,
+      waiting: false,
+    },
+    {
+      label: "Docker stream",
+      value: lastContainersAt ? formatFreshness(lastContainersAt, now) : "Waiting",
+      ok: containersFresh,
+      waiting: !lastContainersAt,
+    },
+    {
+      label: "Stats sample",
+      value: formatFreshness(lastStatsAt, now),
+      ok: statsFresh,
+      waiting: !lastStatsAt,
+    },
+    {
+      label: "Resource history",
+      value: historyReady ? `${historyCount} samples` : historyCount === 1 ? "Collecting" : "Waiting",
+      ok: historyReady,
+      waiting: historyCount === 0,
+    },
+    {
+      label: "Alerts",
+      value: rulesLoading ? "Checking" : activeRuleCount > 0 ? `${activeRuleCount} active` : "None active",
+      ok: activeRuleCount > 0,
+      waiting: rulesLoading,
+    },
+  ];
+
+  return (
+    <div className="harbor-card harbor-card-static p-5 space-y-4">
+      <div className="flex items-center justify-between">
+        <h3 className="text-xs font-semibold uppercase tracking-wider" style={{ color: "var(--color-muted)" }}>
+          Harbor Status
+        </h3>
+        <CircleDashed size={16} style={{ color: "var(--color-muted)" }} />
+      </div>
+
+      <div className="space-y-2">
+        {checks.map((check) => {
+          const tone = confidenceTone(check.ok, check.waiting);
+          const Icon = check.ok ? CheckCircle2 : check.waiting ? CircleDashed : AlertTriangle;
+          return (
+            <div key={check.label} className="flex items-center justify-between gap-3 text-sm">
+              <span className="flex min-w-0 items-center gap-2" style={{ color: "var(--color-text)" }}>
+                <span
+                  className="flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full"
+                  style={tone}
+                >
+                  <Icon size={13} />
+                </span>
+                <span className="truncate">{check.label}</span>
+              </span>
+              <span className="flex-shrink-0 text-xs font-medium tabular-nums" style={{ color: "var(--color-muted)" }}>
+                {check.value}
+              </span>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
 export default function Dashboard() {
   const { stats, formatted, history } = useSystemStats();
   const containers = useContainers();
   const wsConnected = useStore((s) => s.wsConnected);
+  const lastStatsAt = useStore((s) => s.lastStatsAt);
+  const lastContainersAt = useStore((s) => s.lastContainersAt);
   const queryClient = useQueryClient();
   const addToast = useStore((s) => s.addToast);
 
@@ -260,6 +374,13 @@ export default function Dashboard() {
   const [showAdd, setShowAdd] = useState(false);
   const [showDiscovery, setShowDiscovery] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
+  const [now, setNow] = useState(0);
+
+  useEffect(() => {
+    setNow(Date.now());
+    const interval = window.setInterval(() => setNow(Date.now()), 5000);
+    return () => window.clearInterval(interval);
+  }, []);
 
   const { data: services = [], isLoading } = useQuery<ServiceItem[]>({
     queryKey: ["services"],
@@ -276,6 +397,12 @@ export default function Dashboard() {
     refetchInterval: 30000,
   });
   const { data: recentStats = [] } = useRecentContainerStats(25);
+  const { data: notificationRules = [], isLoading: rulesLoading } = useQuery<NotificationRuleSummary[]>({
+    queryKey: ["notification-rules"],
+    queryFn: () => api.get("/notifications/rules").then((r) => r.data),
+    refetchInterval: 60_000,
+  });
+  const activeRuleCount = notificationRules.filter((rule) => rule.enabled).length;
 
   const saveMutation = useMutation({
     mutationFn: (updated: ServiceItem[]) => api.put("/services", { services: updated }),
@@ -407,6 +534,7 @@ export default function Dashboard() {
           <StatCard
             label="RAM"
             value={formatted?.ram ?? "—"}
+            detail={formatted?.ramDetail}
             icon={<MemoryStick size={16} />}
             accent={{ bg: "var(--color-warning-dim)", fg: "var(--color-warning)" }}
             percent={stats?.ram_percent}
@@ -417,6 +545,7 @@ export default function Dashboard() {
           <StatCard
             label="Disk"
             value={formatted?.disk ?? "—"}
+            detail={formatted?.diskDetail}
             icon={<HardDrive size={16} />}
             accent={{ bg: "var(--color-success-dim)", fg: "var(--color-success)" }}
             percent={stats?.disk_percent}
@@ -434,6 +563,16 @@ export default function Dashboard() {
         </div>
 
         <DockerSummary containers={containers} />
+
+        <StatusConfidence
+          wsConnected={wsConnected}
+          lastStatsAt={lastStatsAt}
+          lastContainersAt={lastContainersAt}
+          historyCount={history.length}
+          activeRuleCount={activeRuleCount}
+          rulesLoading={rulesLoading}
+          now={now}
+        />
 
         <OperationsTimeline />
       </div>

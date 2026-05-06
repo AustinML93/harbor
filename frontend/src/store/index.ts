@@ -10,6 +10,8 @@ interface LiveState {
   stats: SystemStats | null;
   containers: ContainerSummary[];
   wsConnected: boolean;
+  lastStatsAt: number | null;
+  lastContainersAt: number | null;
   setStats: (stats: SystemStats) => void;
   setContainers: (containers: ContainerSummary[]) => void;
   setWsConnected: (connected: boolean) => void;
@@ -54,8 +56,10 @@ export const useStore = create<AuthState & LiveState & ThemeState & ToastState>(
   stats: null,
   containers: [],
   wsConnected: false,
-  setStats: (stats) => set({ stats }),
-  setContainers: (containers) => set({ containers }),
+  lastStatsAt: null,
+  lastContainersAt: null,
+  setStats: (stats) => set({ stats, lastStatsAt: Date.now() }),
+  setContainers: (containers) => set({ containers, lastContainersAt: Date.now() }),
   setWsConnected: (connected) => set({ wsConnected: connected }),
 
   // Theme

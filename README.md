@@ -110,7 +110,7 @@ Harbor runs on port `3113` by default. To change it, edit `docker-compose.yml`:
 
 ```yaml
 ports:
-  - "8080:80"   # change 3113 to whatever port you want
+  - "3113:80"   # change the left side, for example "8080:80"
 ```
 
 ### Data volume

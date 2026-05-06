@@ -10,6 +10,8 @@ Start next session by reviewing first-pass OMV/forum feedback if available. If t
    - Gather first-pass feedback before adding broader Docker management features.
    - Refresh README/GitHub screenshots after meaningful UI changes using `npm run screenshots`.
    - Iterate the OMV forum post draft after feedback from real OMV/self-hosted users.
+   - Revisit dashboard/sidebar UX density after the Harbor Status addition:
+     reduce the "too much blank space" feel, keep the left service area useful when there are few services, and make the right rail feel balanced rather than long.
 
 2. **Operations Visibility Polish**
    - Expand the activity timeline with richer event types.
@@ -18,8 +20,6 @@ Start next session by reviewing first-pass OMV/forum feedback if available. If t
 
 3. **Resource Insight Polish**
    - Add lightweight anomaly hints such as "higher than usual" or "memory rising" from recent averages.
-   - Revisit metric card context while polishing the dashboard:
-     RAM/disk absolute values and capacity subtitles are useful when they do not make the cards feel crowded.
 
 4. **Container Detail Experience**
    - Grow the resource deep-dive into a fuller container detail drawer/page.
@@ -30,11 +30,20 @@ Start next session by reviewing first-pass OMV/forum feedback if available. If t
 5. **First-Run And Reliability UX**
    - Add a first-run checklist:
      password changed, Docker socket connected, `services.yml` writable, first resource sample collected, alerts configured.
-   - Add status confidence indicators:
-     WebSocket connected, Docker reachable, last stats sample time, alerts active.
    - Consider a demo mode or seed script for GitHub screenshots and forum evaluation.
 
+6. **Beszel-Inspired Monitoring Depth**
+   - Add host-level alert rules for CPU, RAM, disk usage, bandwidth, load average, and stale stats samples.
+   - Introduce reusable notification destinations with test buttons instead of only per-rule webhook URLs.
+   - Prioritize common homelab channels first:
+     ntfy, Gotify, Pushover, Slack, Discord, Telegram, and email.
+   - Grow the system health area into a system detail page with historical host metrics, disk/network context, container attribution, and alert history.
+   - Explore hardware health signals after the core monitoring UX is solid:
+     S.M.A.R.T. status, temperature sensors, disk I/O, and GPU metrics.
+
 ## Recently Completed
+- Dashboard confidence and metric context:
+  RAM/disk cards now include absolute capacity context, and the dashboard shows WebSocket, Docker stream, stat freshness, resource-history, and alert-rule confidence.
 - Resource insight empty/loading polish:
   top users, table sparklines, and container trend details now explain when Harbor is still collecting 60s samples.
 - Top resource users now ranks containers by peak CPU/RAM over the last 24h, with average usage context.
@@ -59,6 +68,8 @@ Start next session by reviewing first-pass OMV/forum feedback if available. If t
 - Alerting & Webhooks (Apprise integration)
 - OMV OS Integration (check for `apt` updates)
 - Persistent Volume Backup Manager
+- Optional Harbor agent for watching an additional NAS, mini-PC, or VPS after the single-host command center experience is excellent
+- Backup/restore workflow for Harbor config, `services.yml`, SQLite history, and screenshot/demo data
 - Compose-aware workflows, but not full Portainer-style management in the near term
 - Expand backend automated test coverage
   Focus next on auth flows, services.yml persistence/validation, and a few more notifier positive-path/error-path cases.
