@@ -106,13 +106,17 @@ npx tsc --noEmit   # Type-check without emitting
 ```
 
 ### Run tests
+
+The backend uses stdlib `unittest` (test classes in `backend/tests/`), run the same way CI does — see `.github/workflows/backend-tests.yml`. There is no `pytest` dependency.
+
 ```bash
 cd backend
-pytest                                           # all tests
-pytest tests/path/test_file.py::test_name -v    # single test
+python -m unittest discover -s tests             # all tests
+python -m unittest tests.test_notifier           # single module
+python -m unittest tests.test_notifier.NotifierTests.test_name  # single test
 ```
 
-> Note: there are currently no tests in the repo. The test suite will be populated as the project matures.
+Current suites: `test_container_stats.py`, `test_notifier.py`, `test_operations_route.py`, `test_services_route.py`. There is no frontend test suite yet.
 
 ---
 
