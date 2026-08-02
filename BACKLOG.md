@@ -35,6 +35,8 @@ Start next session by reviewing first-pass OMV/forum feedback if available. If t
 6. **Beszel-Inspired Monitoring Depth**
    - Add host-level alert rules for CPU, RAM, disk usage, bandwidth, load average, and stale stats samples.
    - Introduce reusable notification destinations with test buttons instead of only per-rule webhook URLs.
+     *Field evidence (2026-08-01): wiring the OMV deployment meant storing the same long ntfy URL on
+     all 17 rules, so changing the topic later would mean editing every rule individually.*
    - Prioritize common homelab channels first:
      ntfy, Gotify, Pushover, Slack, Discord, Telegram, and email.
    - Grow the system health area into a system detail page with historical host metrics, disk/network context, container attribution, and alert history.
@@ -96,6 +98,10 @@ noted under Beszel-Inspired Monitoring Depth above.
    - **Prerequisite:** an external heartbeat receiver (healthchecks.io, Uptime Kuma push,
      or self-hosted equivalent) with its own notification channel configured; complements
      rather than replaces Harbor's on-host alerting.
+   - **Note (2026-08-01): the receiver now exists.** A Cloudflare Worker
+     (`homelab-heartbeat`) already accepts authenticated beats from the OMV and Hermes boxes and
+     alerts via Telegram when one goes silent for 45 minutes. Harbor emitting its own beat to that
+     endpoint would be a small, concrete first implementation of this item.
 
 9. **Opt-In Auto-Restart (Autoheal-Style)**
    - **Problem:** An unhealthy or crash-looping container currently only alerts (at best)
@@ -121,6 +127,52 @@ noted under Beszel-Inspired Monitoring Depth above.
      - A container that keeps failing hits the backoff/max-restarts guard instead of
        looping forever, and that condition is itself surfaced.
    - **Prerequisite:** a working notification channel (Slack/ntfy/Gotify webhook).
+
+10. **Notifier Robustness And Delivery Semantics**
+
+    Found while putting Harbor's alerting into real production use on the OMV box
+    (2026-08-01: 17 container rules wired to a self-hosted ntfy topic, verified end-to-end by
+    stopping a throwaway container). These are gaps in the existing `notifier.py` path rather
+    than new features, and they surfaced only under actual operation. Complements the reusable
+    notification destinations in item 6 — that item fixes *where* alerts go; this one fixes
+    *what gets sent* and *whether the send is trustworthy*.
+
+    - **Provider-shaped payloads (or a configurable body template).**
+      `Notifier._send()` always POSTs a fixed `{"text": ..., "container": ...}` body, which is
+      Slack-shaped. Anything else renders it as a raw JSON blob. The live workaround is to make
+      the *URL* do the formatting — ntfy's `?tpl=1` message templating with
+      `title=Harbor%3A%20{{.container}}&message={{.text}}` — which pushes provider-specific
+      knowledge into a config field and breaks silently if the payload keys ever change.
+      Either emit per-provider payloads (paired with item 6's destination types) or expose a
+      body template with documented placeholders.
+    - **Distinguish down from recovery.** Down and recovery messages go through the same
+      `webhook_url`, so any priority/tags baked into that URL apply to both — in the live
+      deployment recovery notifications arrive at `priority=high` alongside genuine outages.
+      Severity should be expressible per event type.
+    - **Persist the alert cooldown.** `_cooldown` is a module-level in-memory dict, so restarting
+      harbor-backend clears it and a still-down container immediately re-alerts. `NotificationLog`
+      (or the unused `settings` table) already provides somewhere durable to keep it.
+    - **A way to test-fire an existing rule.** `POST /api/notifications/test-webhook` only proves
+      the URL is reachable; nothing exercises `check_and_fire()`'s real detection path. Verifying
+      the deployment required creating a throwaway container with a 0-minute threshold, stopping
+      it, and watching for the alert. A "simulate this rule firing" action would make alerting
+      verifiable without touching real services.
+    - **Guard against thresholds shorter than routine maintenance.** Hosts that stop containers
+      on a schedule will false-alarm if `down_threshold_minutes` is set too low — the OMV box's
+      nightly appdata backup stops ~27 containers for ~75 seconds, which a sub-2-minute threshold
+      would turn into a nightly page storm. Warn on very low thresholds in the UI, or document a
+      recommended floor.
+
+    - **Acceptance criteria:**
+      - A rule can deliver a correctly-rendered message to at least one non-Slack-shaped target
+        (ntfy or Gotify) without encoding a template in the URL.
+      - Recovery notifications can carry a different severity/priority than down notifications.
+      - Restarting harbor-backend does not cause an immediate re-alert for a container that was
+        already alerted and is still down.
+      - A rule can be test-fired from the UI, producing a real notification and a
+        `NotificationLog` entry, without stopping a real container.
+    - **Prerequisite:** none beyond a working notification channel; item 6's destinations would
+      make the payload work cleaner but are not required.
 
 ## Recently Completed
 - Dashboard confidence and metric context:
