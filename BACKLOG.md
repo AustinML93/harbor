@@ -1,5 +1,7 @@
 # Harbor Backlog
 
+_Repo-scoped backlog. Cross-cutting family and homelab initiatives live in `~/Developer/Projects/agent-backlog/projects/`; see `~/Developer/Projects/CLAUDE.md` for the split._
+
 This document tracks upcoming features and architectural improvements for Harbor.
 
 ## Up Next

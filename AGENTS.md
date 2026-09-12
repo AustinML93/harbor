@@ -1,8 +1,17 @@
+<!-- Canonical agent doc for this repo. CLAUDE.md contains only `@AGENTS.md`. Edit this file only. -->
 # AGENTS.md
 
-This file provides guidance to Codex (Codex.ai/code) when working with code in this repository.
+## Current handoff
+_Rewritten in place at every close-out; history lives in git._
 
-# Harbor — Codex Context
+- **Last updated:** 2026-09-12
+- **Landed:** AGENTS.md made the canonical agent doc (CLAUDE.md = `.md`); docs branch `docs/backlog-active-monitoring` fast-forwarded into main and deleted locally. Push pending.
+- **Verified live:** nothing — docs-only session.
+- **Next session — pick from:** push main + delete the remote branch; then top of BACKLOG.md.
+
+This file provides guidance to any coding agent (Claude Code, Codex) when working with code in this repository.
+
+# Harbor — Agent Context
 
 ## Project Overview
 
@@ -106,13 +115,17 @@ npx tsc --noEmit   # Type-check without emitting
 ```
 
 ### Run tests
+
+The backend uses stdlib `unittest` (test classes in `backend/tests/`), run the same way CI does — see `.github/workflows/backend-tests.yml`. There is no `pytest` dependency.
+
 ```bash
 cd backend
-pytest                                           # all tests
-pytest tests/path/test_file.py::test_name -v    # single test
+python -m unittest discover -s tests             # all tests
+python -m unittest tests.test_notifier           # single module
+python -m unittest tests.test_notifier.NotifierTests.test_name  # single test
 ```
 
-> Note: there are currently no tests in the repo. The test suite will be populated as the project matures.
+Current suites: `test_container_stats.py`, `test_notifier.py`, `test_operations_route.py`, `test_services_route.py`. There is no frontend test suite yet.
 
 ---
 
